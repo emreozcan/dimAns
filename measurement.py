@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from enum import Enum
 from fractions import Fraction
 from functools import total_ordering
-from numbers import Number, Rational
+from numbers import Rational, Real
 from typing import Any
 
 import attrs
@@ -45,6 +45,7 @@ class CompoundUnit:
                     f"= {self._str_with_multiplicands()}>")
         return f"<{self.__class__.__name__} {self}>"
 
+    # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
         if not isinstance(power, float):
             if not isinstance(power, Rational):
@@ -76,7 +77,7 @@ class CompoundUnit:
                 if exponent != 0
             })
 
-        if isinstance(other, Number):
+        if isinstance(other, Real):
             return Quantity(other, self)
         return NotImplemented
 
@@ -94,12 +95,14 @@ class CompoundUnit:
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
+    # endregion
 
+    # region Comparison handlers
     def __eq__(self, other: Any, /):
         if isinstance(other, BaseUnit):
             other = other.as_unit()
         if isinstance(other, CompoundUnit):
-            if self._dim() != other._dim():
+            if self.dimension_map() != other.dimension_map():
                 return False
             if self.si_factor() != other.si_factor():
                 return False
@@ -110,10 +113,11 @@ class CompoundUnit:
         if isinstance(other, BaseUnit):
             other = other.as_unit()
         if isinstance(other, CompoundUnit):
-            if self._dim() != other._dim():
+            if self.dimension_map() != other.dimension_map():
                 raise ValueError(f"units must have the same dimensions")
             return self.si_factor() > other.si_factor()
         return NotImplemented
+    # endregion
 
     def _str_with_multiplicands(self):
         if not self.unit_exponents:
@@ -123,13 +127,7 @@ class CompoundUnit:
             for base_unit, exponent in self.unit_exponents.items()
         ])
 
-    def multiplicative_inverse(self):
-        return CompoundUnit(None, {
-            base_unit: -exponent
-            for base_unit, exponent in self.unit_exponents.items()
-        })
-
-    def _dim(self):
+    def dimension_map(self):
         dimensions = {}
         for base_unit, exponent in self.unit_exponents.items():
             if base_unit.dimension not in dimensions:
@@ -140,8 +138,8 @@ class CompoundUnit:
                     del dimensions[base_unit.dimension]
         return dimensions
 
-    def dim(self):
-        return Dimensions.from_map(self._dim())
+    def dimensions(self):
+        return Dimensions.from_map(self.dimension_map())
 
     def si_factor(self):
         factor = 1
@@ -158,7 +156,7 @@ class CompoundUnit:
         """
         if isinstance(other, BaseUnit):
             other = other.as_unit()
-        if self.dim() != other.dim():
+        if self.dimensions() != other.dimensions():
             raise ValueError(f"units must have the same dimensions")
         return self.si_factor() / other.si_factor()
 
@@ -171,9 +169,18 @@ class CompoundUnit:
         """
         if isinstance(other, BaseUnit):
             other = other.as_unit()
-        if self.dim() != other.dim():
+        if self.dimensions() != other.dimensions():
             raise ValueError(f"units must have the same dimensions")
         return other.si_factor() / self.si_factor()
+
+    def as_quantity(self) -> Quantity:
+        return Quantity(1, self)
+
+    def multiplicative_inverse(self):
+        return CompoundUnit(None, {
+            base_unit: -exponent
+            for base_unit, exponent in self.unit_exponents.items()
+        })
 
 
 @total_ordering
@@ -207,6 +214,7 @@ class BaseUnit:
     def __repr__(self):
         return f"<{self.__class__.__name__} {self}>"
 
+    # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
         if not isinstance(power, float):
             if not isinstance(power, Rational):
@@ -223,7 +231,7 @@ class BaseUnit:
                 return self ** 2
             return self.as_unit() * other.as_unit()
 
-        if isinstance(other, Number):
+        if isinstance(other, Real):
             return Quantity(other, self.as_unit())
         return NotImplemented
 
@@ -241,7 +249,9 @@ class BaseUnit:
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
+    # endregion
 
+    # region Comparison handlers
     def __eq__(self, other: Any, /):
         if isinstance(other, CompoundUnit):
             return self.as_unit() == other
@@ -261,6 +271,7 @@ class BaseUnit:
                 raise ValueError(f"units must have the same dimensions")
             return self.si_factor > other.si_factor
         return NotImplemented
+    # endregion
 
     def _check_compatible(self, other: Any, /):
         if not isinstance(other, BaseUnit):
@@ -270,8 +281,11 @@ class BaseUnit:
             raise ValueError(f"{self.dimension} unit not compatible with "
                              f"{other.dimension} unit")
 
-    def dim(self):
-        return Dimensions.from_map({self.dimension: Fraction(1)})
+    def dimension_map(self):
+        return {self.dimension: Fraction(1)}
+
+    def dimensions(self):
+        return Dimensions.from_map(self.dimension_map())
 
     def conversion_factor_to(self, other: BaseUnit, /):
         """Get the conversion factor from this unit to another unit.
@@ -295,6 +309,9 @@ class BaseUnit:
 
     def as_unit(self) -> CompoundUnit:
         return CompoundUnit(None, {self: 1})
+
+    def as_quantity(self) -> Quantity:
+        return Quantity(1, self.as_unit())
 
     def multiplicative_inverse(self) -> CompoundUnit:
         return CompoundUnit(None, {self: -1})
