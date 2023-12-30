@@ -12,23 +12,23 @@ import attrs
 @attrs.define(slots=True, frozen=True, eq=False)
 class Quantity:
     value: Number
-    unit: Unit
+    unit: CompoundUnit
 
 
 @attrs.define(slots=True, frozen=True, repr=False)
-class Unit:
-    """Represents a product of base unit exponents."""
+class CompoundUnit:
+    """Represents a product of one or more base units."""
     symbol: str | None
     unit_exponents: Mapping[BaseUnit, Fraction | float]
 
     @classmethod
     def named(
-            cls,
-            symbol: str,
-            exponents_or_unit: Mapping[BaseUnit, Fraction | float] | Unit,
-            /
+        cls,
+        symbol: str,
+        exponents_or_unit: Mapping[BaseUnit, Fraction | float] | CompoundUnit,
+        /
     ):
-        if isinstance(exponents_or_unit, Unit):
+        if isinstance(exponents_or_unit, CompoundUnit):
             return cls(symbol, exponents_or_unit.unit_exponents)
         return cls(symbol, exponents_or_unit)
 
@@ -48,13 +48,13 @@ class Unit:
             if not isinstance(power, Rational):
                 return NotImplemented
             power = Fraction(power)
-        return Unit(None, {
+        return CompoundUnit(None, {
             base_unit: exponent * power
             for base_unit, exponent in self.unit_exponents.items()
         })
 
     def __mul__(self, other: Any, /):
-        if isinstance(other, Unit):
+        if isinstance(other, CompoundUnit):
             base_units = []
             for unit in self.unit_exponents.keys():
                 if unit not in base_units:
@@ -63,7 +63,7 @@ class Unit:
                 if unit not in base_units:
                     base_units.append(unit)
 
-            return Unit(None, {
+            return CompoundUnit(None, {
                 base_unit: exponent
                 for base_unit, exponent in {
                     base_unit:
@@ -84,7 +84,7 @@ class Unit:
     def __truediv__(self, other: Any, /):
         if other == 1:
             return self
-        if isinstance(other, Unit):
+        if isinstance(other, CompoundUnit):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
@@ -102,7 +102,7 @@ class Unit:
         ])
 
     def multiplicative_inverse(self):
-        return Unit(None, {
+        return CompoundUnit(None, {
             base_unit: -exponent
             for base_unit, exponent in self.unit_exponents.items()
         })
@@ -152,10 +152,10 @@ class BaseUnit:
             if not isinstance(power, Rational):
                 return NotImplemented
             power = Fraction(power)
-        return Unit(None, {self: power})
+        return CompoundUnit(None, {self: power})
 
     def __mul__(self, other: Any, /):
-        if isinstance(other, Unit):
+        if isinstance(other, CompoundUnit):
             return self.as_unit() * other
 
         if isinstance(other, BaseUnit):
@@ -210,11 +210,11 @@ class BaseUnit:
         self._check_compatible(other)
         return other.si_factor / self.si_factor
 
-    def as_unit(self) -> Unit:
-        return Unit(None, {self: 1})
+    def as_unit(self) -> CompoundUnit:
+        return CompoundUnit(None, {self: 1})
 
-    def multiplicative_inverse(self) -> Unit:
-        return Unit(None, {self: -1})
+    def multiplicative_inverse(self) -> CompoundUnit:
+        return CompoundUnit(None, {self: -1})
 
 
 class Dimension(Enum):
