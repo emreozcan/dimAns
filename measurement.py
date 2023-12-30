@@ -33,6 +33,38 @@ class BaseUnitExponent:
     def __repr__(self):
         return f"<{self.__class__.__name__} {self}>"
 
+    def __pow__(self, power: int | Fraction | float, modulo=None):
+        if isinstance(power, float):  # Do not touch floats
+            return self.base_unit ** (self.exponent * power)
+        # Convert everything except floats to Fraction
+        if not isinstance(power, Rational):
+            return NotImplemented
+        return self.base_unit ** (self.exponent * Fraction(power))
+
+    def __mul__(self, other: Any, /):
+        if isinstance(other, BaseUnitExponent):
+            if other.base_unit == self.base_unit:
+                return self.base_unit ** (self.exponent + other.exponent)
+            return NotImplemented  # todo: implement this
+        return NotImplemented
+
+    def __rmul__(self, other: Any, /):
+        return self * other  # Multiplication is commutative
+
+    def __truediv__(self, other: Any, /):
+        if isinstance(other, BaseUnitExponent):
+            if other.base_unit == self.base_unit:
+                return self.base_unit ** (self.exponent - other.exponent)
+            return NotImplemented  # todo: implement this
+        return NotImplemented
+
+    def __rtruediv__(self, other: Any, /):
+        if isinstance(other, BaseUnitExponent):
+            if other.base_unit == self.base_unit:
+                return self.base_unit ** (other.exponent - self.exponent)
+            return NotImplemented  # todo: implement this
+        return NotImplemented
+
 
 @attrs.define(slots=True, frozen=True, repr=False)
 class BaseUnit:
