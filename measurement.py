@@ -250,7 +250,6 @@ class BaseUnit:
 
 
 class Dimension(Enum):
-    ONE = "1"
     MASS = "M"
     LENGTH = "L"
     LUMINOUS_INTENSITY = "J"
@@ -288,7 +287,6 @@ ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
 mi = BaseUnit("mi", Dimension.LENGTH, Fraction(201168, 125))
 
 si_units = {
-    Dimension.ONE: None,
     Dimension.MASS: kg,
     Dimension.LENGTH: m,
     Dimension.LUMINOUS_INTENSITY: cd,
