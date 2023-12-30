@@ -28,6 +28,8 @@ class BaseUnitExponent:
     exponent: Fraction | float
 
     def __str__(self):
+        if self.exponent == 1:
+            return str(self.base_unit)
         return f"{self.base_unit}^{self.exponent}"
 
     def __repr__(self):
