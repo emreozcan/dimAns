@@ -81,14 +81,24 @@ class Dimension(Enum):
 
 
 g = BaseUnit("g", Dimension.MASS, Fraction(1, 1000))
+kg = BaseUnit("kg", Dimension.MASS, Fraction(1))
+nm = BaseUnit("nm", Dimension.LENGTH, Fraction(1, 1_000_000_000))
+um = BaseUnit("µm", Dimension.LENGTH, Fraction(1, 1_000_000))
+mm = BaseUnit("mm", Dimension.LENGTH, Fraction(1, 1000))
+cm = BaseUnit("cm", Dimension.LENGTH, Fraction(1, 100))
 m = BaseUnit("m", Dimension.LENGTH, Fraction(1))
+km = BaseUnit("km", Dimension.LENGTH, Fraction(1000))
 cd = BaseUnit("cd", Dimension.LUMINOUS_INTENSITY, Fraction(1))
+ms = BaseUnit("ms", Dimension.TIME, Fraction(1, 1000))
 s = BaseUnit("s", Dimension.TIME, Fraction(1))
+mA = BaseUnit("mA", Dimension.ELECTRIC_CURRENT, Fraction(1, 1000))
 A = BaseUnit("A", Dimension.ELECTRIC_CURRENT, Fraction(1))
 K = BaseUnit("K", Dimension.TEMPERATURE, Fraction(1))
 mol = BaseUnit("mol", Dimension.AMOUNT_OF_SUBSTANCE, Fraction(1))
 
-lb = BaseUnit("lb", Dimension.MASS, Fraction(453_592_37, 100_000_000))
+lbs = BaseUnit("lbs", Dimension.MASS, Fraction(45359237, 100000000))
+oz = BaseUnit("oz", Dimension.MASS, Fraction(45359237, 16*100000000))
+inches = BaseUnit("in", Dimension.LENGTH, Fraction(381, 12*1250))
 ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
 
 base_units = {
