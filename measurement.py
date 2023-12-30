@@ -187,6 +187,19 @@ class Quantity:
     def additive_inverse(self):
         return Quantity(-self.value, self.unit)
 
+    def convert_to(self, other: CompoundUnit | BaseUnit, /):
+        """Convert this quantity to another unit.
+
+        This method returns a new Quantity
+        which is equivalent to this quantity
+        but in the other unit.
+        """
+        if isinstance(other, BaseUnit):
+            other = other.as_unit()
+        if self.unit.dimensions() != other.dimensions():
+            raise ValueError(f"target unit must have the same dimensions")
+        return self * self.unit.conversion_factor_to(other)
+
 
 @total_ordering
 @attrs.define(slots=True, frozen=True, repr=False, eq=False)
