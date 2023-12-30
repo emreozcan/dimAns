@@ -101,7 +101,7 @@ oz = BaseUnit("oz", Dimension.MASS, Fraction(45359237, 16*100000000))
 inches = BaseUnit("in", Dimension.LENGTH, Fraction(381, 12*1250))
 ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
 
-base_units = {
+si_units = {
     Dimension.MASS: kg,
     Dimension.LENGTH: m,
     Dimension.LUMINOUS_INTENSITY: cd,
