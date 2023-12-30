@@ -207,6 +207,7 @@ class DerivedUnit:
     """Represents a product of one or more base units."""
     symbol: str | None
     unit_exponents: Mapping[BaseUnit, Fraction | float]
+    factor: Fraction = Fraction(1)
 
     @classmethod
     def named(
@@ -219,12 +220,18 @@ class DerivedUnit:
             return cls(symbol, exponents_or_unit.unit_exponents)
         return cls(symbol, exponents_or_unit)
 
+    @classmethod
+    def using(cls, ref: DerivedUnit, symbol: str | None, factor: Fraction):
+        return cls(symbol, ref.unit_exponents, factor)
+
     def __str__(self):
+        # todo: Add display for self.factor
         if self.symbol:
             return self.symbol
         return self._str_with_multiplicands()
 
     def __repr__(self):
+        # todo: Add display for self.factor
         if self.symbol:
             return (f"<{self.__class__.__name__} {self} "
                     f"= {self._str_with_multiplicands()}>")
@@ -326,7 +333,7 @@ class DerivedUnit:
         return Dimensions.from_map(self.dimension_map())
 
     def si_factor(self):
-        factor = 1
+        factor = self.factor
         for base_unit, exponent in self.unit_exponents.items():
             factor *= base_unit.si_factor ** exponent
         return factor
@@ -470,23 +477,27 @@ class BaseUnit:
     def dimensions(self):
         return Dimensions.from_map(self.dimension_map())
 
-    def conversion_factor_to(self, other: BaseUnit, /):
+    def conversion_factor_to(self, other: BaseUnit | DerivedUnit, /):
         """Get the conversion factor from this unit to another unit.
 
         This method returns the factor
         by which a measurement in this unit must be multiplied
         to get a measurement in the other unit.
         """
+        if isinstance(other, DerivedUnit):
+            return self.as_unit().conversion_factor_to(other)
         self._check_compatible(other)
         return self.si_factor / other.si_factor
 
-    def conversion_factor_from(self, other: BaseUnit, /):
+    def conversion_factor_from(self, other: BaseUnit | DerivedUnit, /):
         """Get the conversion factor from another unit to this unit.
 
         This method returns the factor
         by which a measurement in the other unit must be multiplied
         to get a measurement in this unit.
         """
+        if isinstance(other, DerivedUnit):
+            return self.as_unit().conversion_factor_from(other)
         self._check_compatible(other)
         return other.si_factor / self.si_factor
 
@@ -559,41 +570,3 @@ class Dimension(Enum):
     ELECTRIC_CURRENT = "I"
     TEMPERATURE = "Θ"
     AMOUNT_OF_SUBSTANCE = "N"
-
-    def si_base_unit(self) -> BaseUnit | None:
-        return si_units[self]
-
-
-mg = BaseUnit("mg", Dimension.MASS, Fraction(1, 1_000_000))
-g = BaseUnit("g", Dimension.MASS, Fraction(1, 1000))
-kg = BaseUnit("kg", Dimension.MASS, Fraction(1))
-nm = BaseUnit("nm", Dimension.LENGTH, Fraction(1, 1_000_000_000))
-um = BaseUnit("µm", Dimension.LENGTH, Fraction(1, 1_000_000))
-mm = BaseUnit("mm", Dimension.LENGTH, Fraction(1, 1000))
-cm = BaseUnit("cm", Dimension.LENGTH, Fraction(1, 100))
-m = BaseUnit("m", Dimension.LENGTH, Fraction(1))
-km = BaseUnit("km", Dimension.LENGTH, Fraction(1000))
-cd = BaseUnit("cd", Dimension.LUMINOUS_INTENSITY, Fraction(1))
-ms = BaseUnit("ms", Dimension.TIME, Fraction(1, 1000))
-s = BaseUnit("s", Dimension.TIME, Fraction(1))
-h = BaseUnit("h", Dimension.TIME, Fraction(3600))
-mA = BaseUnit("mA", Dimension.ELECTRIC_CURRENT, Fraction(1, 1000))
-A = BaseUnit("A", Dimension.ELECTRIC_CURRENT, Fraction(1))
-K = BaseUnit("K", Dimension.TEMPERATURE, Fraction(1))
-mol = BaseUnit("mol", Dimension.AMOUNT_OF_SUBSTANCE, Fraction(1))
-
-lbs = BaseUnit("lbs", Dimension.MASS, Fraction(45359237, 100000000))
-oz = BaseUnit("oz", Dimension.MASS, Fraction(45359237, 16*100000000))
-inches = BaseUnit("in", Dimension.LENGTH, Fraction(381, 12*1250))
-ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
-mi = BaseUnit("mi", Dimension.LENGTH, Fraction(201168, 125))
-
-si_units = {
-    Dimension.MASS: kg,
-    Dimension.LENGTH: m,
-    Dimension.LUMINOUS_INTENSITY: cd,
-    Dimension.TIME: s,
-    Dimension.ELECTRIC_CURRENT: A,
-    Dimension.TEMPERATURE: K,
-    Dimension.AMOUNT_OF_SUBSTANCE: mol,
-}
