@@ -499,6 +499,10 @@ class BaseUnit:
     def multiplicative_inverse(self) -> CompoundUnit:
         return CompoundUnit(None, {self: -1})
 
+    @classmethod
+    def using(cls, ref: BaseUnit, symbol: str, factor: Fraction):
+        return cls(symbol, ref.dimension, ref.si_factor * factor)
+
 
 @attrs.define(slots=True, frozen=True, repr=False)
 class Dimensions:
