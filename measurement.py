@@ -30,7 +30,14 @@ class BaseUnitExponent:
 
 @attrs.define(slots=True, frozen=True, eq=False, repr=False)
 class BaseUnit:
-    """A unit of measurement which only has one dimension of power 1."""
+    """A unit of measurement which only has one dimension of power 1.
+
+    What the above statement means in layman's terms is that
+    a base unit is a unit, which is not a combination of other units.
+
+    For example, the meter is a base unit, the second is a base unit, but
+    meters per second is not a base unit.
+    """
 
     symbol: str
     """The symbol of the unit.
