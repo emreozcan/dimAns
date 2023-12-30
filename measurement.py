@@ -42,12 +42,13 @@ class Quantity:
             if not new_unit.dimension_map():
                 return self.value * other.value
             return Quantity(self.value * other.value, new_unit)
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return self * other.as_quantity()
         if isinstance(other, Real):
             return Quantity(self.value * other, self.unit)
         return NotImplemented
 
-    def __rmul__(self, other: Any, /):
-        return self * other  # Multiplication is commutative
+    __rmul__ = __mul__
 
     def __add__(self, other: Any, /):
         if isinstance(other, Quantity):
@@ -57,8 +58,7 @@ class Quantity:
             return Quantity(self.value + other.value, self.unit)
         return NotImplemented
 
-    def __radd__(self, other: Any, /):
-        return self + other  # Addition is commutative
+    __radd__ = __add__
 
     def __sub__(self, other: Any, /):
         if isinstance(other, Quantity):
@@ -80,6 +80,8 @@ class Quantity:
     def __truediv__(self, other: Any, /):
         if isinstance(other, Quantity):
             return self * other.multiplicative_inverse()
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return self / other.as_quantity()
         if isinstance(other, Real):
             return Quantity(self.value / other, self.unit)
         return NotImplemented
@@ -87,6 +89,8 @@ class Quantity:
     def __rtruediv__(self, other: Any, /):
         if isinstance(other, Quantity):
             return self.multiplicative_inverse() * other
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return self.multiplicative_inverse() * other.as_quantity()
         if isinstance(other, Real):
             return Quantity(
                 other / self.value,
@@ -103,6 +107,8 @@ class Quantity:
                 raise ValueError(f"units must be the same")
             div_, mod_ = divmod(self.value, other.value)
             return div_, Quantity(mod_, self.unit)
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return divmod(self, other.as_quantity())
         return NotImplemented
 
     def __floordiv__(self, other: Any, /):
@@ -111,6 +117,8 @@ class Quantity:
             if not new_unit.dimension_map():
                 return self.value // other.value
             return Quantity(self.value // other.value, new_unit)
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return self // other.as_quantity()
         if isinstance(other, Real):
             return Quantity(self.value // other, self.unit)
         return NotImplemented
@@ -121,6 +129,8 @@ class Quantity:
             if not new_unit.dimension_map():
                 return other.value // self.value
             return Quantity(other.value // self.value, new_unit)
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return other.as_quantity() // self
         if isinstance(other, Real):
             return Quantity(
                 other // self.value,
@@ -134,6 +144,8 @@ class Quantity:
                 # todo: Remove this restriction.
                 raise ValueError(f"units must be the same")
             return Quantity(self.value % other.value, self.unit)
+        if isinstance(other, (CompoundUnit, BaseUnit)):
+            return self % other.as_quantity()
         return NotImplemented
 
     def __neg__(self):
@@ -241,8 +253,7 @@ class CompoundUnit:
             return Quantity(other, self)
         return NotImplemented
 
-    def __rmul__(self, other):
-        return self * other  # Multiplication is commutative
+    __rmul__ = __mul__
 
     def __truediv__(self, other: Any, /):
         if other == 1:
@@ -395,8 +406,7 @@ class BaseUnit:
             return Quantity(other, self.as_unit())
         return NotImplemented
 
-    def __rmul__(self, other: Any, /):
-        return self * other  # Multiplication is commutative
+    __rmul__ = __mul__
 
     def __truediv__(self, other: Any, /):
         if other == 1:
