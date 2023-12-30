@@ -10,10 +10,170 @@ from typing import Any
 import attrs
 
 
-@attrs.define(slots=True, frozen=True, eq=False)
+@total_ordering
+@attrs.define(slots=True, frozen=True, repr=False, eq=False)
 class Quantity:
-    value: Number
+    value: Real
     unit: CompoundUnit
+
+    def __str__(self):
+        return f"{self.value} {self.unit}"
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self}>"
+
+    # region Arithmetic operation handlers
+    def __pow__(self, power: int | Fraction | float, modulo=None):
+        if not isinstance(power, float):
+            if not isinstance(power, Rational):
+                return NotImplemented
+            power = Fraction(power)
+        if not isinstance(self.value, float):
+            if not isinstance(self.value, Rational):
+                return NotImplemented
+            value = Fraction(self.value)
+        else:
+            value = self.value
+        return Quantity(value ** power, self.unit ** power)
+
+    def __mul__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            new_unit = self.unit * other.unit
+            if not new_unit.dimension_map():
+                return self.value * other.value
+            return Quantity(self.value * other.value, new_unit)
+        if isinstance(other, Real):
+            return Quantity(self.value * other, self.unit)
+        return NotImplemented
+
+    def __rmul__(self, other: Any, /):
+        return self * other  # Multiplication is commutative
+
+    def __add__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            if self.unit != other.unit:
+                # todo: Remove this restriction.
+                raise ValueError(f"units must be the same")
+            return Quantity(self.value + other.value, self.unit)
+        return NotImplemented
+
+    def __radd__(self, other: Any, /):
+        return self + other  # Addition is commutative
+
+    def __sub__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            return self + other.additive_inverse()
+        return NotImplemented
+
+    def __rsub__(self, other: Any, /):
+        return other + self.additive_inverse()
+
+    def __abs__(self):
+        return Quantity(abs(self.value), self.unit)
+
+    def __ceil__(self):
+        return Quantity(self.value.__ceil__(), self.unit)
+
+    def __floor__(self):
+        return Quantity(self.value.__floor__(), self.unit)
+
+    def __truediv__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            return self * other.multiplicative_inverse()
+        if isinstance(other, Real):
+            return Quantity(self.value / other, self.unit)
+        return NotImplemented
+
+    def __rtruediv__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            return self.multiplicative_inverse() * other
+        if isinstance(other, Real):
+            return Quantity(
+                other / self.value,
+                self.unit.multiplicative_inverse()
+            )
+        return NotImplemented
+
+    def __divmod__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            if self.unit != other.unit:
+                # todo: Remove this restriction.
+                #       Please note that dividing a Quantity by a Quantity
+                #       may result in a regular Integral.
+                raise ValueError(f"units must be the same")
+            div_, mod_ = divmod(self.value, other.value)
+            return div_, Quantity(mod_, self.unit)
+        return NotImplemented
+
+    def __floordiv__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            new_unit = self.unit / other.unit
+            if not new_unit.dimension_map():
+                return self.value // other.value
+            return Quantity(self.value // other.value, new_unit)
+        if isinstance(other, Real):
+            return Quantity(self.value // other, self.unit)
+        return NotImplemented
+
+    def __rfloordiv__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            new_unit = other.unit / self.unit
+            if not new_unit.dimension_map():
+                return other.value // self.value
+            return Quantity(other.value // self.value, new_unit)
+        if isinstance(other, Real):
+            return Quantity(
+                other // self.value,
+                self.unit.multiplicative_inverse()
+            )
+        return NotImplemented
+
+    def __mod__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            if self.unit != other.unit:
+                # todo: Remove this restriction.
+                raise ValueError(f"units must be the same")
+            return Quantity(self.value % other.value, self.unit)
+        return NotImplemented
+
+    def __neg__(self):
+        return Quantity(-self.value, self.unit)
+
+    def __round__(self, n=None):
+        return Quantity(self.value.__round__(n), self.unit)
+    # endregion
+
+    # region Comparison handlers
+    def __eq__(self, other: Any, /):
+        if isinstance(other, Quantity):
+            if self.dimension_map() != other.dimension_map():
+                return False
+            if (self.value * self.unit.si_factor()
+                    != other.value * other.unit.si_factor()):
+                return False
+            return True
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Quantity):
+            if self.dimension_map() != other.dimension_map():
+                raise ValueError(f"units must have the same dimensions")
+            return (self.value * self.unit.si_factor()
+                    > other.value * other.unit.si_factor())
+        return NotImplemented
+    # endregion
+
+    def dimension_map(self):
+        return self.unit.dimension_map()
+
+    def dimensions(self):
+        return self.unit.dimensions()
+
+    def multiplicative_inverse(self):
+        return Quantity(1 / self.value, self.unit.multiplicative_inverse())
+
+    def additive_inverse(self):
+        return Quantity(-self.value, self.unit)
 
 
 @total_ordering
