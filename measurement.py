@@ -59,7 +59,7 @@ class BaseUnit:
             raise ValueError(f"{self.dimension} unit not compatible with "
                              f"{other.dimension} unit")
 
-    def get_conversion_factor_to(self, other: BaseUnit, /):
+    def conversion_factor_to(self, other: BaseUnit, /):
         """Get the conversion factor from this unit to another unit.
 
         This method returns the factor
@@ -69,7 +69,7 @@ class BaseUnit:
         self.__check_compatible(other)
         return self.si_factor / other.si_factor
 
-    def get_conversion_factor_from(self, other: BaseUnit, /):
+    def conversion_factor_from(self, other: BaseUnit, /):
         """Get the conversion factor from another unit to this unit.
 
         This method returns the factor
