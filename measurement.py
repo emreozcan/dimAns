@@ -65,11 +65,11 @@ class BaseUnit:
         return f"<{self.__class__.__name__} {self}>"
 
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, Rational):
-            return NotImplemented
         if isinstance(power, float):  # Do not touch floats
             return BaseUnitExponent(self, power)
         # Convert everything except floats to Fraction
+        if not isinstance(power, Rational):
+            return NotImplemented
         return BaseUnitExponent(self, Fraction(power))
 
     def __mul__(self, other: Any, /):
