@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from enum import Enum
 from fractions import Fraction
+from functools import total_ordering
 from numbers import Number, Rational
 from typing import Any
 
@@ -15,7 +16,8 @@ class Quantity:
     unit: CompoundUnit
 
 
-@attrs.define(slots=True, frozen=True, repr=False)
+@total_ordering
+@attrs.define(slots=True, frozen=True, repr=False, eq=False)
 class CompoundUnit:
     """Represents a product of one or more base units."""
     symbol: str | None
@@ -93,6 +95,26 @@ class CompoundUnit:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
 
+    def __eq__(self, other: Any, /):
+        if isinstance(other, BaseUnit):
+            other = other.as_unit()
+        if isinstance(other, CompoundUnit):
+            if self._dim() != other._dim():
+                return False
+            if self.si_factor() != other.si_factor():
+                return False
+            return True
+        return NotImplemented
+
+    def __gt__(self, other: Any, /):
+        if isinstance(other, BaseUnit):
+            other = other.as_unit()
+        if isinstance(other, CompoundUnit):
+            if self._dim() != other._dim():
+                raise ValueError(f"units must have the same dimensions")
+            return self.si_factor() > other.si_factor()
+        return NotImplemented
+
     def _str_with_multiplicands(self):
         if not self.unit_exponents:
             return "1"
@@ -107,7 +129,7 @@ class CompoundUnit:
             for base_unit, exponent in self.unit_exponents.items()
         })
 
-    def dim(self):
+    def _dim(self):
         dimensions = {}
         for base_unit, exponent in self.unit_exponents.items():
             if base_unit.dimension not in dimensions:
@@ -116,7 +138,10 @@ class CompoundUnit:
                 dimensions[base_unit.dimension] += exponent
                 if dimensions[base_unit.dimension] == 0:
                     del dimensions[base_unit.dimension]
-        return Dimensions.from_map(dimensions)
+        return dimensions
+
+    def dim(self):
+        return Dimensions.from_map(self._dim())
 
     def si_factor(self):
         factor = 1
@@ -151,7 +176,8 @@ class CompoundUnit:
         return other.si_factor() / self.si_factor()
 
 
-@attrs.define(slots=True, frozen=True, repr=False)
+@total_ordering
+@attrs.define(slots=True, frozen=True, repr=False, eq=False)
 class BaseUnit:
     """A unit of measurement which only has one dimension of power 1.
 
@@ -215,6 +241,26 @@ class BaseUnit:
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
+
+    def __eq__(self, other: Any, /):
+        if isinstance(other, CompoundUnit):
+            return self.as_unit() == other
+        if isinstance(other, BaseUnit):
+            if self.dimension != other.dimension:
+                return False
+            if self.si_factor != other.si_factor:
+                return False
+            return True
+        return NotImplemented
+
+    def __gt__(self, other: Any, /):
+        if isinstance(other, CompoundUnit):
+            return self.as_unit() > other
+        if isinstance(other, BaseUnit):
+            if self.dimension != other.dimension:
+                raise ValueError(f"units must have the same dimensions")
+            return self.si_factor > other.si_factor
+        return NotImplemented
 
     def _check_compatible(self, other: Any, /):
         if not isinstance(other, BaseUnit):
