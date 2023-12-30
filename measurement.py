@@ -114,7 +114,9 @@ class CompoundUnit:
                 dimensions[base_unit.dimension] = exponent
             else:
                 dimensions[base_unit.dimension] += exponent
-        return dimensions
+                if dimensions[base_unit.dimension] == 0:
+                    del dimensions[base_unit.dimension]
+        return Dimensions.from_map(dimensions)
 
     def si_factor(self):
         factor = 1
@@ -222,6 +224,9 @@ class BaseUnit:
             raise ValueError(f"{self.dimension} unit not compatible with "
                              f"{other.dimension} unit")
 
+    def dim(self):
+        return Dimensions.from_map({self.dimension: Fraction(1)})
+
     def conversion_factor_to(self, other: BaseUnit, /):
         """Get the conversion factor from this unit to another unit.
 
@@ -247,6 +252,53 @@ class BaseUnit:
 
     def multiplicative_inverse(self) -> CompoundUnit:
         return CompoundUnit(None, {self: -1})
+
+
+@attrs.define(slots=True, frozen=True, repr=False)
+class Dimensions:
+    mass: Fraction | float = Fraction(0)
+    length: Fraction | float = Fraction(0)
+    luminous_intensity: Fraction | float = Fraction(0)
+    time: Fraction | float = Fraction(0)
+    electric_current: Fraction | float = Fraction(0)
+    temperature: Fraction | float = Fraction(0)
+    amount_of_substance: Fraction | float = Fraction(0)
+
+    def __str__(self):
+        if all(exponent == 0 for exponent in self.as_map().values()):
+            return "1"
+
+        return " ".join([
+            f"{dimension.value}^{exponent}"
+            for dimension, exponent in self.as_map().items()
+            if exponent != 0
+        ])
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self}>"
+
+    @classmethod
+    def from_map(cls, _map: Mapping[Dimension, Fraction | float]):
+        return cls(
+            _map.get(Dimension.MASS, Fraction(0)),
+            _map.get(Dimension.LENGTH, Fraction(0)),
+            _map.get(Dimension.LUMINOUS_INTENSITY, Fraction(0)),
+            _map.get(Dimension.TIME, Fraction(0)),
+            _map.get(Dimension.ELECTRIC_CURRENT, Fraction(0)),
+            _map.get(Dimension.TEMPERATURE, Fraction(0)),
+            _map.get(Dimension.AMOUNT_OF_SUBSTANCE, Fraction(0)),
+        )
+
+    def as_map(self) -> Mapping[Dimension, Fraction | float]:
+        return {
+            Dimension.MASS: self.mass,
+            Dimension.LENGTH: self.length,
+            Dimension.LUMINOUS_INTENSITY: self.luminous_intensity,
+            Dimension.TIME: self.time,
+            Dimension.ELECTRIC_CURRENT: self.electric_current,
+            Dimension.TEMPERATURE: self.temperature,
+            Dimension.AMOUNT_OF_SUBSTANCE: self.amount_of_substance,
+        }
 
 
 class Dimension(Enum):
