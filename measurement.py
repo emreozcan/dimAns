@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from enum import Enum
 from fractions import Fraction
 from numbers import Number
+from typing import Any
 
 import attrs
 
@@ -50,22 +51,32 @@ class BaseUnit:
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.symbol}>"
 
-    def get_conversion_factor_to(self, other: BaseUnit, /):
+    def __check_compatible(self, other: Any, /):
         if not isinstance(other, BaseUnit):
             raise TypeError(f"expected BaseUnit, "
                             f"got {other.__class__.__name__}")
         if self.dimension != other.dimension:
-            raise ValueError(f"cannot convert {self.dimension} unit to "
+            raise ValueError(f"{self.dimension} unit not compatible with "
                              f"{other.dimension} unit")
+
+    def get_conversion_factor_to(self, other: BaseUnit, /):
+        """Get the conversion factor from this unit to another unit.
+
+        This method returns the factor
+        by which a measurement in this unit must be multiplied
+        to get a measurement in the other unit.
+        """
+        self.__check_compatible(other)
         return self.si_factor / other.si_factor
 
     def get_conversion_factor_from(self, other: BaseUnit, /):
-        if not isinstance(other, BaseUnit):
-            raise TypeError(f"expected BaseUnit, "
-                            f"got {other.__class__.__name__}")
-        if self.dimension != other.dimension:
-            raise ValueError(f"cannot convert {self.dimension} unit to "
-                             f"{other.dimension} unit")
+        """Get the conversion factor from another unit to this unit.
+
+        This method returns the factor
+        by which a measurement in the other unit must be multiplied
+        to get a measurement in this unit.
+        """
+        self.__check_compatible(other)
         return other.si_factor / self.si_factor
 
 
