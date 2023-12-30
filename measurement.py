@@ -55,9 +55,13 @@ class Unit:
 
     def __mul__(self, other: Any, /):
         if isinstance(other, Unit):
-            this_base_units = set(self.unit_exponents.keys())
-            other_base_units = set(other.unit_exponents.keys())
-            union = this_base_units | other_base_units
+            base_units = []
+            for unit in self.unit_exponents.keys():
+                if unit not in base_units:
+                    base_units.append(unit)
+            for unit in other.unit_exponents.keys():
+                if unit not in base_units:
+                    base_units.append(unit)
 
             return Unit(None, {
                 base_unit: exponent
@@ -65,7 +69,7 @@ class Unit:
                     base_unit:
                         self.unit_exponents.get(base_unit, 0) +
                         other.unit_exponents.get(base_unit, 0)
-                    for base_unit in union
+                    for base_unit in base_units
                 }.items()
                 if exponent != 0
             })
