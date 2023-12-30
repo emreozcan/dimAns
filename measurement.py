@@ -142,6 +142,9 @@ class Dimension(Enum):
     TEMPERATURE = "Θ"
     AMOUNT_OF_SUBSTANCE = "N"
 
+    def si_base_unit(self) -> BaseUnit | None:
+        return si_units[self]
+
 
 mg = BaseUnit("mg", Dimension.MASS, Fraction(1, 1_000_000))
 g = BaseUnit("g", Dimension.MASS, Fraction(1, 1000))
@@ -166,6 +169,7 @@ inches = BaseUnit("in", Dimension.LENGTH, Fraction(381, 12*1250))
 ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
 
 si_units = {
+    Dimension.ONE: None,
     Dimension.MASS: kg,
     Dimension.LENGTH: m,
     Dimension.LUMINOUS_INTENSITY: cd,
