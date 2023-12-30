@@ -243,6 +243,7 @@ km = BaseUnit("km", Dimension.LENGTH, Fraction(1000))
 cd = BaseUnit("cd", Dimension.LUMINOUS_INTENSITY, Fraction(1))
 ms = BaseUnit("ms", Dimension.TIME, Fraction(1, 1000))
 s = BaseUnit("s", Dimension.TIME, Fraction(1))
+h = BaseUnit("h", Dimension.TIME, Fraction(3600))
 mA = BaseUnit("mA", Dimension.ELECTRIC_CURRENT, Fraction(1, 1000))
 A = BaseUnit("A", Dimension.ELECTRIC_CURRENT, Fraction(1))
 K = BaseUnit("K", Dimension.TEMPERATURE, Fraction(1))
@@ -252,6 +253,7 @@ lbs = BaseUnit("lbs", Dimension.MASS, Fraction(45359237, 100000000))
 oz = BaseUnit("oz", Dimension.MASS, Fraction(45359237, 16*100000000))
 inches = BaseUnit("in", Dimension.LENGTH, Fraction(381, 12*1250))
 ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
+mi = BaseUnit("mi", Dimension.LENGTH, Fraction(201168, 125))
 
 si_units = {
     Dimension.ONE: None,
