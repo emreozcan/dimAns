@@ -91,6 +91,7 @@ class Dimension(Enum):
     AMOUNT_OF_SUBSTANCE = "N"
 
 
+mg = BaseUnit("mg", Dimension.MASS, Fraction(1, 1_000_000))
 g = BaseUnit("g", Dimension.MASS, Fraction(1, 1000))
 kg = BaseUnit("kg", Dimension.MASS, Fraction(1))
 nm = BaseUnit("nm", Dimension.LENGTH, Fraction(1, 1_000_000_000))
