@@ -116,6 +116,38 @@ class CompoundUnit:
                 dimensions[base_unit.dimension] += exponent
         return dimensions
 
+    def si_factor(self):
+        factor = 1
+        for base_unit, exponent in self.unit_exponents.items():
+            factor *= base_unit.si_factor ** exponent
+        return factor
+
+    def conversion_factor_to(self, other: CompoundUnit | BaseUnit, /):
+        """Get the conversion factor from this unit to another unit.
+
+        This method returns the factor
+        by which a measurement in this unit must be multiplied
+        to get a measurement in the other unit.
+        """
+        if isinstance(other, BaseUnit):
+            other = other.as_unit()
+        if self.dim() != other.dim():
+            raise ValueError(f"units must have the same dimensions")
+        return self.si_factor() / other.si_factor()
+
+    def conversion_factor_from(self, other: CompoundUnit | BaseUnit, /):
+        """Get the conversion factor from another unit to this unit.
+
+        This method returns the factor
+        by which a measurement in the other unit must be multiplied
+        to get a measurement in this unit.
+        """
+        if isinstance(other, BaseUnit):
+            other = other.as_unit()
+        if self.dim() != other.dim():
+            raise ValueError(f"units must have the same dimensions")
+        return other.si_factor() / self.si_factor()
+
 
 @attrs.define(slots=True, frozen=True, repr=False)
 class BaseUnit:
