@@ -20,13 +20,18 @@ class Unit:
     base_unit_exponents: Mapping[Dimension, BaseUnitExponent]
 
 
-@attrs.define(slots=True, frozen=True, eq=False)
+@attrs.define(slots=True, frozen=True, repr=False)
 class BaseUnitExponent:
     """Represents a base unit raised to some exponent."""
 
     base_unit: BaseUnit
-    exponent: Fraction
+    exponent: Fraction | float
 
+    def __str__(self):
+        return f"{self.base_unit}^{self.exponent}"
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} {self}>"
 
 
 @attrs.define(slots=True, frozen=True, repr=False)
