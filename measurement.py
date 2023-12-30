@@ -28,7 +28,8 @@ class BaseUnitExponent:
     exponent: Fraction
 
 
-@attrs.define(slots=True, frozen=True, eq=False, repr=False)
+
+@attrs.define(slots=True, frozen=True, repr=False)
 class BaseUnit:
     """A unit of measurement which only has one dimension of power 1.
 
