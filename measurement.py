@@ -15,57 +15,102 @@ class Quantity:
     unit: Unit
 
 
-@attrs.define(slots=True, frozen=True, eq=False)
-class Unit:
-    base_unit_exponents: Mapping[Dimension, BaseUnitExponent]
-
-
 @attrs.define(slots=True, frozen=True, repr=False)
-class BaseUnitExponent:
-    """Represents a base unit raised to some exponent."""
+class Unit:
+    """Represents a product of base unit exponents."""
+    symbol: str | None
+    unit_exponents: Mapping[BaseUnit, Fraction | float]
 
-    base_unit: BaseUnit
-    exponent: Fraction | float
+    @classmethod
+    def named(
+            cls,
+            symbol: str,
+            exponents_or_unit: Mapping[BaseUnit, Fraction | float] | Unit,
+            /
+    ):
+        if isinstance(exponents_or_unit, Unit):
+            return cls(symbol, exponents_or_unit.unit_exponents)
+        return cls(symbol, exponents_or_unit)
 
     def __str__(self):
-        if self.exponent == 1:
-            return str(self.base_unit)
-        return f"{self.base_unit}^{self.exponent}"
+        if self.symbol:
+            return self.symbol
+        return self._str_with_multiplicands()
 
     def __repr__(self):
+        if self.symbol:
+            return (f"<{self.__class__.__name__} {self} "
+                    f"= {self._str_with_multiplicands()}>")
         return f"<{self.__class__.__name__} {self}>"
 
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if isinstance(power, float):  # Do not touch floats
-            return self.base_unit ** (self.exponent * power)
-        # Convert everything except floats to Fraction
-        if not isinstance(power, Rational):
-            return NotImplemented
-        return self.base_unit ** (self.exponent * Fraction(power))
+        if not isinstance(power, float):
+            if not isinstance(power, Rational):
+                return NotImplemented
+            power = Fraction(power)
+        return Unit(None, {
+            base_unit: exponent * power
+            for base_unit, exponent in self.unit_exponents.items()
+        })
 
     def __mul__(self, other: Any, /):
-        if isinstance(other, BaseUnitExponent):
-            if other.base_unit == self.base_unit:
-                return self.base_unit ** (self.exponent + other.exponent)
-            return NotImplemented  # todo: implement this
+        if isinstance(other, Unit):
+            this_base_units = set(self.unit_exponents.keys())
+            other_base_units = set(other.unit_exponents.keys())
+            union = this_base_units | other_base_units
+
+            return Unit(None, {
+                base_unit: exponent
+                for base_unit, exponent in {
+                    base_unit:
+                        self.unit_exponents.get(base_unit, 0) +
+                        other.unit_exponents.get(base_unit, 0)
+                    for base_unit in union
+                }.items()
+                if exponent != 0
+            })
+
+        if isinstance(other, Number):
+            return Quantity(other, self)
         return NotImplemented
 
-    def __rmul__(self, other: Any, /):
+    def __rmul__(self, other):
         return self * other  # Multiplication is commutative
 
     def __truediv__(self, other: Any, /):
-        if isinstance(other, BaseUnitExponent):
-            if other.base_unit == self.base_unit:
-                return self.base_unit ** (self.exponent - other.exponent)
-            return NotImplemented  # todo: implement this
+        if other == 1:
+            return self
+        if isinstance(other, Unit):
+            return self * other.multiplicative_inverse()
         return NotImplemented
 
     def __rtruediv__(self, other: Any, /):
-        if isinstance(other, BaseUnitExponent):
-            if other.base_unit == self.base_unit:
-                return self.base_unit ** (other.exponent - self.exponent)
-            return NotImplemented  # todo: implement this
-        return NotImplemented
+        if other == 1:
+            return self.multiplicative_inverse()
+        return other * self.multiplicative_inverse()
+
+    def _str_with_multiplicands(self):
+        if not self.unit_exponents:
+            return "1"
+        return " ".join([
+            f"{base_unit}^{exponent}" if exponent != 1 else str(base_unit)
+            for base_unit, exponent in self.unit_exponents.items()
+        ])
+
+    def multiplicative_inverse(self):
+        return Unit(None, {
+            base_unit: -exponent
+            for base_unit, exponent in self.unit_exponents.items()
+        })
+
+    def dim(self):
+        dimensions = {}
+        for base_unit, exponent in self.unit_exponents.items():
+            if base_unit.dimension not in dimensions:
+                dimensions[base_unit.dimension] = exponent
+            else:
+                dimensions[base_unit.dimension] += exponent
+        return dimensions
 
 
 @attrs.define(slots=True, frozen=True, repr=False)
@@ -99,56 +144,39 @@ class BaseUnit:
         return f"<{self.__class__.__name__} {self}>"
 
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if isinstance(power, float):  # Do not touch floats
-            return BaseUnitExponent(self, power)
-        # Convert everything except floats to Fraction
-        if not isinstance(power, Rational):
-            return NotImplemented
-        return BaseUnitExponent(self, Fraction(power))
+        if not isinstance(power, float):
+            if not isinstance(power, Rational):
+                return NotImplemented
+            power = Fraction(power)
+        return Unit(None, {self: power})
 
     def __mul__(self, other: Any, /):
+        if isinstance(other, Unit):
+            return self.as_unit() * other
+
         if isinstance(other, BaseUnit):
             if self == other:
                 return self ** 2
-            return NotImplemented  # todo: implement this
+            return self.as_unit() * other.as_unit()
 
-        if isinstance(other, BaseUnitExponent):
-            if other.base_unit == self:
-                return self ** (other.exponent + 1)
-            return NotImplemented  # todo: implement this
-
-        if other == 1:
-            return self
+        if isinstance(other, Number):
+            return Quantity(other, self.as_unit())
         return NotImplemented
 
     def __rmul__(self, other: Any, /):
         return self * other  # Multiplication is commutative
 
     def __truediv__(self, other: Any, /):
-        if isinstance(other, BaseUnit):
-            if self == other:
-                return 1
-            return NotImplemented  # todo: implement this
-        if isinstance(other, BaseUnitExponent):
-            if other.base_unit == self:
-                return self ** (1 - other.exponent)
-            return NotImplemented  # todo: implement this.
         if other == 1:
             return self
+        if isinstance(other, BaseUnit):
+            return self.multiplicative_inverse() * other
         return NotImplemented
 
     def __rtruediv__(self, other: Any, /):
-        if isinstance(other, BaseUnit):
-            if self == other:
-                return 1
-            return NotImplemented  # todo: implement this
-        if isinstance(other, BaseUnitExponent):
-            if other.base_unit == self:
-                return self ** (other.exponent - 1)
-            return NotImplemented  # todo: implement this
         if other == 1:
-            return self ** -1
-        return NotImplemented
+            return self.multiplicative_inverse()
+        return other * self.multiplicative_inverse()
 
     def _check_compatible(self, other: Any, /):
         if not isinstance(other, BaseUnit):
@@ -177,6 +205,12 @@ class BaseUnit:
         """
         self._check_compatible(other)
         return other.si_factor / self.si_factor
+
+    def as_unit(self) -> Unit:
+        return Unit(None, {self: 1})
+
+    def multiplicative_inverse(self) -> Unit:
+        return Unit(None, {self: -1})
 
 
 class Dimension(Enum):
