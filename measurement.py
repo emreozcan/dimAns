@@ -344,7 +344,7 @@ class CompoundUnit:
 
 
 @total_ordering
-@attrs.define(slots=True, frozen=True, repr=False, eq=False)
+@attrs.define(slots=True, frozen=True, repr=False, eq=False, hash=True)
 class BaseUnit:
     """A unit of measurement which only has one dimension of power 1.
 
