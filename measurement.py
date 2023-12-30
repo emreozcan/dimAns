@@ -148,7 +148,7 @@ class BaseUnit:
             return self ** -1
         return NotImplemented
 
-    def __check_compatible(self, other: Any, /):
+    def _check_compatible(self, other: Any, /):
         if not isinstance(other, BaseUnit):
             raise TypeError(f"expected BaseUnit, "
                             f"got {other.__class__.__name__}")
@@ -163,7 +163,7 @@ class BaseUnit:
         by which a measurement in this unit must be multiplied
         to get a measurement in the other unit.
         """
-        self.__check_compatible(other)
+        self._check_compatible(other)
         return self.si_factor / other.si_factor
 
     def conversion_factor_from(self, other: BaseUnit, /):
@@ -173,7 +173,7 @@ class BaseUnit:
         by which a measurement in the other unit must be multiplied
         to get a measurement in this unit.
         """
-        self.__check_compatible(other)
+        self._check_compatible(other)
         return other.si_factor / self.si_factor
 
 
