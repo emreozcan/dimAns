@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
-from enum import Enum
-from fractions import Fraction
-from functools import total_ordering
-from numbers import Rational, Real
-from typing import Any
+from collections.abc import Mapping as _Mapping
+from enum import Enum as _Enum
+from fractions import Fraction as _Fraction
+from functools import total_ordering as _total_ordering
+from numbers import Rational as _Rational, Real as _Real
+from typing import Any as _Any
 
-import attrs
+import attrs as _attrs
 
 
-@total_ordering
-@attrs.define(slots=True, frozen=True, repr=False, eq=False)
+@_total_ordering
+@_attrs.define(slots=True, frozen=True, repr=False, eq=False)
 class Quantity:
-    value: Real
+    value: _Real
     unit: DerivedUnit
 
     def __str__(self):
@@ -23,20 +23,20 @@ class Quantity:
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: int | Fraction | float, modulo=None):
+    def __pow__(self, power: int | _Fraction | float, modulo=None):
         if not isinstance(power, float):
-            if not isinstance(power, Rational):
+            if not isinstance(power, _Rational):
                 return NotImplemented
-            power = Fraction(power)
+            power = _Fraction(power)
         if not isinstance(self.value, float):
-            if not isinstance(self.value, Rational):
+            if not isinstance(self.value, _Rational):
                 return NotImplemented
-            value = Fraction(self.value)
+            value = _Fraction(self.value)
         else:
             value = self.value
         return Quantity(value ** power, self.unit ** power)
 
-    def __mul__(self, other: Any, /):
+    def __mul__(self, other: _Any, /):
         if isinstance(other, Quantity):
             new_unit = self.unit * other.unit
             if not new_unit.dimension_map():
@@ -44,13 +44,13 @@ class Quantity:
             return Quantity(self.value * other.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self * other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(self.value * other, self.unit)
         return NotImplemented
 
     __rmul__ = __mul__
 
-    def __add__(self, other: Any, /):
+    def __add__(self, other: _Any, /):
         if isinstance(other, Quantity):
             if self.unit != other.unit:
                 # todo: Remove this restriction.
@@ -60,12 +60,12 @@ class Quantity:
 
     __radd__ = __add__
 
-    def __sub__(self, other: Any, /):
+    def __sub__(self, other: _Any, /):
         if isinstance(other, Quantity):
             return self + other.additive_inverse()
         return NotImplemented
 
-    def __rsub__(self, other: Any, /):
+    def __rsub__(self, other: _Any, /):
         return other + self.additive_inverse()
 
     def __abs__(self):
@@ -77,28 +77,28 @@ class Quantity:
     def __floor__(self):
         return Quantity(self.value.__floor__(), self.unit)
 
-    def __truediv__(self, other: Any, /):
+    def __truediv__(self, other: _Any, /):
         if isinstance(other, Quantity):
             return self * other.multiplicative_inverse()
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self / other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(self.value / other, self.unit)
         return NotImplemented
 
-    def __rtruediv__(self, other: Any, /):
+    def __rtruediv__(self, other: _Any, /):
         if isinstance(other, Quantity):
             return self.multiplicative_inverse() * other
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self.multiplicative_inverse() * other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(
                 other / self.value,
                 self.unit.multiplicative_inverse()
             )
         return NotImplemented
 
-    def __divmod__(self, other: Any, /):
+    def __divmod__(self, other: _Any, /):
         if isinstance(other, Quantity):
             if self.unit != other.unit:
                 # todo: Remove this restriction.
@@ -111,7 +111,7 @@ class Quantity:
             return divmod(self, other.as_quantity())
         return NotImplemented
 
-    def __floordiv__(self, other: Any, /):
+    def __floordiv__(self, other: _Any, /):
         if isinstance(other, Quantity):
             new_unit = self.unit / other.unit
             if not new_unit.dimension_map():
@@ -119,11 +119,11 @@ class Quantity:
             return Quantity(self.value // other.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self // other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(self.value // other, self.unit)
         return NotImplemented
 
-    def __rfloordiv__(self, other: Any, /):
+    def __rfloordiv__(self, other: _Any, /):
         if isinstance(other, Quantity):
             new_unit = other.unit / self.unit
             if not new_unit.dimension_map():
@@ -131,14 +131,14 @@ class Quantity:
             return Quantity(other.value // self.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return other.as_quantity() // self
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(
                 other // self.value,
                 self.unit.multiplicative_inverse()
             )
         return NotImplemented
 
-    def __mod__(self, other: Any, /):
+    def __mod__(self, other: _Any, /):
         if isinstance(other, Quantity):
             if self.unit != other.unit:
                 # todo: Remove this restriction.
@@ -156,7 +156,7 @@ class Quantity:
     # endregion
 
     # region Comparison handlers
-    def __eq__(self, other: Any, /):
+    def __eq__(self, other: _Any, /):
         if isinstance(other, Quantity):
             if self.dimension_map() != other.dimension_map():
                 return False
@@ -201,19 +201,19 @@ class Quantity:
         return self * self.unit.conversion_factor_to(other)
 
 
-@total_ordering
-@attrs.define(slots=True, frozen=True, repr=False, eq=False)
+@_total_ordering
+@_attrs.define(slots=True, frozen=True, repr=False, eq=False)
 class DerivedUnit:
     """Represents a product of one or more base units."""
     symbol: str | None
-    unit_exponents: Mapping[BaseUnit, Fraction | float]
-    factor: Fraction = Fraction(1)
+    unit_exponents: _Mapping[BaseUnit, _Fraction | float]
+    factor: _Fraction = _Fraction(1)
 
     @classmethod
     def named(
         cls,
         symbol: str,
-        exponents_or_unit: Mapping[BaseUnit, Fraction | float] | DerivedUnit,
+        exponents_or_unit: _Mapping[BaseUnit, _Fraction | float] | DerivedUnit,
         /
     ):
         if isinstance(exponents_or_unit, DerivedUnit):
@@ -221,7 +221,7 @@ class DerivedUnit:
         return cls(symbol, exponents_or_unit)
 
     @classmethod
-    def using(cls, ref: DerivedUnit, symbol: str | None, factor: Fraction):
+    def using(cls, ref: DerivedUnit, symbol: str | None, factor: _Fraction):
         return cls(symbol, ref.unit_exponents, factor)
 
     def __str__(self):
@@ -238,17 +238,17 @@ class DerivedUnit:
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: int | Fraction | float, modulo=None):
+    def __pow__(self, power: int | _Fraction | float, modulo=None):
         if not isinstance(power, float):
-            if not isinstance(power, Rational):
+            if not isinstance(power, _Rational):
                 return NotImplemented
-            power = Fraction(power)
+            power = _Fraction(power)
         return DerivedUnit(None, {
             base_unit: exponent * power
             for base_unit, exponent in self.unit_exponents.items()
         })
 
-    def __mul__(self, other: Any, /):
+    def __mul__(self, other: _Any, /):
         if isinstance(other, DerivedUnit):
             base_units = []
             for unit in self.unit_exponents.keys():
@@ -269,27 +269,27 @@ class DerivedUnit:
                 if exponent != 0
             })
 
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(other, self)
         return NotImplemented
 
     __rmul__ = __mul__
 
-    def __truediv__(self, other: Any, /):
+    def __truediv__(self, other: _Any, /):
         if other == 1:
             return self
         if isinstance(other, DerivedUnit):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
-    def __rtruediv__(self, other: Any, /):
+    def __rtruediv__(self, other: _Any, /):
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
     # endregion
 
     # region Comparison handlers
-    def __eq__(self, other: Any, /):
+    def __eq__(self, other: _Any, /):
         if isinstance(other, BaseUnit):
             other = other.as_unit()
         if isinstance(other, DerivedUnit):
@@ -300,7 +300,7 @@ class DerivedUnit:
             return True
         return NotImplemented
 
-    def __gt__(self, other: Any, /):
+    def __gt__(self, other: _Any, /):
         if isinstance(other, BaseUnit):
             other = other.as_unit()
         if isinstance(other, DerivedUnit):
@@ -374,8 +374,8 @@ class DerivedUnit:
         })
 
 
-@total_ordering
-@attrs.define(slots=True, frozen=True, repr=False, eq=False, hash=True)
+@_total_ordering
+@_attrs.define(slots=True, frozen=True, repr=False, eq=False, hash=True)
 class BaseUnit:
     """A unit of measurement which only has one dimension of power 1.
 
@@ -395,7 +395,7 @@ class BaseUnit:
     dimension: Dimension
     """The dimension of the unit."""
 
-    si_factor: Fraction
+    si_factor: _Fraction
     """The factor by which the base SI unit of the dimension is multiplied by.
     """
 
@@ -406,14 +406,14 @@ class BaseUnit:
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: int | Fraction | float, modulo=None):
+    def __pow__(self, power: int | _Fraction | float, modulo=None):
         if not isinstance(power, float):
-            if not isinstance(power, Rational):
+            if not isinstance(power, _Rational):
                 return NotImplemented
-            power = Fraction(power)
+            power = _Fraction(power)
         return DerivedUnit(None, {self: power})
 
-    def __mul__(self, other: Any, /):
+    def __mul__(self, other: _Any, /):
         if isinstance(other, DerivedUnit):
             return self.as_unit() * other
 
@@ -422,27 +422,27 @@ class BaseUnit:
                 return self ** 2
             return self.as_unit() * other.as_unit()
 
-        if isinstance(other, Real):
+        if isinstance(other, _Real):
             return Quantity(other, self.as_unit())
         return NotImplemented
 
     __rmul__ = __mul__
 
-    def __truediv__(self, other: Any, /):
+    def __truediv__(self, other: _Any, /):
         if other == 1:
             return self
         if isinstance(other, BaseUnit):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
-    def __rtruediv__(self, other: Any, /):
+    def __rtruediv__(self, other: _Any, /):
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
     # endregion
 
     # region Comparison handlers
-    def __eq__(self, other: Any, /):
+    def __eq__(self, other: _Any, /):
         if isinstance(other, DerivedUnit):
             return self.as_unit() == other
         if isinstance(other, BaseUnit):
@@ -453,7 +453,7 @@ class BaseUnit:
             return True
         return NotImplemented
 
-    def __gt__(self, other: Any, /):
+    def __gt__(self, other: _Any, /):
         if isinstance(other, DerivedUnit):
             return self.as_unit() > other
         if isinstance(other, BaseUnit):
@@ -463,7 +463,7 @@ class BaseUnit:
         return NotImplemented
     # endregion
 
-    def _check_compatible(self, other: Any, /):
+    def _check_compatible(self, other: _Any, /):
         if not isinstance(other, BaseUnit):
             raise TypeError(f"expected BaseUnit, "
                             f"got {other.__class__.__name__}")
@@ -472,7 +472,7 @@ class BaseUnit:
                              f"{other.dimension} unit")
 
     def dimension_map(self):
-        return {self.dimension: Fraction(1)}
+        return {self.dimension: _Fraction(1)}
 
     def dimensions(self):
         return Dimensions.from_map(self.dimension_map())
@@ -511,19 +511,19 @@ class BaseUnit:
         return DerivedUnit(None, {self: -1})
 
     @classmethod
-    def using(cls, ref: BaseUnit, symbol: str, factor: Fraction):
+    def using(cls, ref: BaseUnit, symbol: str, factor: _Fraction):
         return cls(symbol, ref.dimension, ref.si_factor * factor)
 
 
-@attrs.define(slots=True, frozen=True, repr=False)
+@_attrs.define(slots=True, frozen=True, repr=False)
 class Dimensions:
-    mass: Fraction | float = Fraction(0)
-    length: Fraction | float = Fraction(0)
-    luminous_intensity: Fraction | float = Fraction(0)
-    time: Fraction | float = Fraction(0)
-    electric_current: Fraction | float = Fraction(0)
-    temperature: Fraction | float = Fraction(0)
-    amount_of_substance: Fraction | float = Fraction(0)
+    mass: _Fraction | float = _Fraction(0)
+    length: _Fraction | float = _Fraction(0)
+    luminous_intensity: _Fraction | float = _Fraction(0)
+    time: _Fraction | float = _Fraction(0)
+    electric_current: _Fraction | float = _Fraction(0)
+    temperature: _Fraction | float = _Fraction(0)
+    amount_of_substance: _Fraction | float = _Fraction(0)
 
     def __str__(self):
         if all(exponent == 0 for exponent in self.as_map().values()):
@@ -539,18 +539,18 @@ class Dimensions:
         return f"<{self.__class__.__name__} {self}>"
 
     @classmethod
-    def from_map(cls, _map: Mapping[Dimension, Fraction | float]):
+    def from_map(cls, _map: _Mapping[Dimension, _Fraction | float]):
         return cls(
-            _map.get(Dimension.MASS, Fraction(0)),
-            _map.get(Dimension.LENGTH, Fraction(0)),
-            _map.get(Dimension.LUMINOUS_INTENSITY, Fraction(0)),
-            _map.get(Dimension.TIME, Fraction(0)),
-            _map.get(Dimension.ELECTRIC_CURRENT, Fraction(0)),
-            _map.get(Dimension.TEMPERATURE, Fraction(0)),
-            _map.get(Dimension.AMOUNT_OF_SUBSTANCE, Fraction(0)),
+            _map.get(Dimension.MASS, _Fraction(0)),
+            _map.get(Dimension.LENGTH, _Fraction(0)),
+            _map.get(Dimension.LUMINOUS_INTENSITY, _Fraction(0)),
+            _map.get(Dimension.TIME, _Fraction(0)),
+            _map.get(Dimension.ELECTRIC_CURRENT, _Fraction(0)),
+            _map.get(Dimension.TEMPERATURE, _Fraction(0)),
+            _map.get(Dimension.AMOUNT_OF_SUBSTANCE, _Fraction(0)),
         )
 
-    def as_map(self) -> Mapping[Dimension, Fraction | float]:
+    def as_map(self) -> _Mapping[Dimension, _Fraction | float]:
         return {
             Dimension.MASS: self.mass,
             Dimension.LENGTH: self.length,
@@ -562,7 +562,7 @@ class Dimensions:
         }
 
 
-class Dimension(Enum):
+class Dimension(_Enum):
     MASS = "M"
     LENGTH = "L"
     LUMINOUS_INTENSITY = "J"
