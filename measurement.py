@@ -174,7 +174,7 @@ class BaseUnit:
         if other == 1:
             return self
         if isinstance(other, BaseUnit):
-            return self.multiplicative_inverse() * other
+            return self * other.multiplicative_inverse()
         return NotImplemented
 
     def __rtruediv__(self, other: Any, /):
