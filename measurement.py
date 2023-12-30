@@ -102,7 +102,7 @@ inches = BaseUnit("in", Dimension.LENGTH, Fraction(381, 12*1250))
 ft = BaseUnit("ft", Dimension.LENGTH, Fraction(381, 1250))
 
 base_units = {
-    Dimension.MASS: g,
+    Dimension.MASS: kg,
     Dimension.LENGTH: m,
     Dimension.LUMINOUS_INTENSITY: cd,
     Dimension.TIME: s,
