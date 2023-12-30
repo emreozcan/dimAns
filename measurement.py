@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from enum import Enum
 from fractions import Fraction
-from numbers import Number
+from numbers import Number, Rational
 from typing import Any
 
 import attrs
@@ -49,7 +49,59 @@ class BaseUnit:
         return self.symbol
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self.symbol}>"
+        return f"<{self.__class__.__name__} {self}>"
+
+    def __pow__(self, power: int | Fraction | float, modulo=None):
+        if not isinstance(power, Rational):
+            return NotImplemented
+        if isinstance(power, float):  # Do not touch floats
+            return BaseUnitExponent(self, power)
+        # Convert everything except floats to Fraction
+        return BaseUnitExponent(self, Fraction(power))
+
+    def __mul__(self, other: Any, /):
+        if isinstance(other, BaseUnit):
+            if self == other:
+                return self ** 2
+            return NotImplemented  # todo: implement this
+
+        if isinstance(other, BaseUnitExponent):
+            if other.base_unit == self:
+                return self ** (other.exponent + 1)
+            return NotImplemented  # todo: implement this
+
+        if other == 1:
+            return self
+        return NotImplemented
+
+    def __rmul__(self, other: Any, /):
+        return self * other  # Multiplication is commutative
+
+    def __truediv__(self, other: Any, /):
+        if isinstance(other, BaseUnit):
+            if self == other:
+                return 1
+            return NotImplemented  # todo: implement this
+        if isinstance(other, BaseUnitExponent):
+            if other.base_unit == self:
+                return self ** (1 - other.exponent)
+            return NotImplemented  # todo: implement this.
+        if other == 1:
+            return self
+        return NotImplemented
+
+    def __rtruediv__(self, other: Any, /):
+        if isinstance(other, BaseUnit):
+            if self == other:
+                return 1
+            return NotImplemented  # todo: implement this
+        if isinstance(other, BaseUnitExponent):
+            if other.base_unit == self:
+                return self ** (other.exponent - 1)
+            return NotImplemented  # todo: implement this
+        if other == 1:
+            return self ** -1
+        return NotImplemented
 
     def __check_compatible(self, other: Any, /):
         if not isinstance(other, BaseUnit):
