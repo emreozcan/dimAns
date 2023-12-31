@@ -40,7 +40,7 @@ class Quantity:
         if isinstance(other, Quantity):
             new_unit = self.unit * other.unit
             if not new_unit.dimension_map():
-                return self.value * other.value
+                return self.value * other.value * new_unit.factor
             return Quantity(self.value * other.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self * other.as_quantity()
@@ -115,7 +115,7 @@ class Quantity:
         if isinstance(other, Quantity):
             new_unit = self.unit / other.unit
             if not new_unit.dimension_map():
-                return self.value // other.value
+                return self.value // other.value * new_unit.factor
             return Quantity(self.value // other.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self // other.as_quantity()
@@ -127,7 +127,7 @@ class Quantity:
         if isinstance(other, Quantity):
             new_unit = other.unit / self.unit
             if not new_unit.dimension_map():
-                return other.value // self.value
+                return other.value // self.value * new_unit.factor
             return Quantity(other.value // self.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return other.as_quantity() // self
@@ -198,7 +198,10 @@ class Quantity:
             other = other.as_unit()
         if self.unit.dimensions() != other.dimensions():
             raise ValueError(f"target unit must have the same dimensions")
-        return self * self.unit.conversion_factor_to(other)
+        return Quantity(
+            self.value * self.unit.conversion_factor_to(other),
+            other
+        )
 
 
 @_total_ordering
@@ -217,12 +220,21 @@ class DerivedUnit:
         /
     ):
         if isinstance(exponents_or_unit, DerivedUnit):
-            return cls(symbol, exponents_or_unit.unit_exponents)
+            return cls(
+                symbol,
+                exponents_or_unit.unit_exponents,
+                exponents_or_unit.factor
+            )
         return cls(symbol, exponents_or_unit)
 
     @classmethod
-    def using(cls, ref: DerivedUnit, symbol: str | None, factor: _Fraction):
-        return cls(symbol, ref.unit_exponents, factor)
+    def using(
+        cls,
+        ref: DerivedUnit,
+        symbol: str | None,
+        factor: _Fraction = _Fraction(1),
+    ):
+        return cls(symbol, ref.unit_exponents, ref.factor * factor)
 
     def __str__(self):
         # todo: Add display for self.factor
@@ -243,10 +255,15 @@ class DerivedUnit:
             if not isinstance(power, _Rational):
                 return NotImplemented
             power = _Fraction(power)
-        return DerivedUnit(None, {
-            base_unit: exponent * power
-            for base_unit, exponent in self.unit_exponents.items()
-        })
+        return DerivedUnit(
+            None,
+            {
+                base_unit: exponent * power
+                for base_unit, exponent in self.unit_exponents.items()
+            },
+            # For some reason, my type checker thinks Fraction ** int is float.
+            self.factor ** power  # type: ignore
+        )
 
     def __mul__(self, other: _Any, /):
         if isinstance(other, DerivedUnit):
@@ -258,16 +275,20 @@ class DerivedUnit:
                 if unit not in base_units:
                     base_units.append(unit)
 
-            return DerivedUnit(None, {
-                base_unit: exponent
-                for base_unit, exponent in {
-                    base_unit:
-                        self.unit_exponents.get(base_unit, 0) +
-                        other.unit_exponents.get(base_unit, 0)
-                    for base_unit in base_units
-                }.items()
-                if exponent != 0
-            })
+            return DerivedUnit(
+                None,
+                {
+                    base_unit: exponent
+                    for base_unit, exponent in {
+                        base_unit:
+                            self.unit_exponents.get(base_unit, 0) +
+                            other.unit_exponents.get(base_unit, 0)
+                        for base_unit in base_units
+                    }.items()
+                    if exponent != 0
+                },
+                self.factor * other.factor
+            )
 
         if isinstance(other, _Real):
             return Quantity(other, self)
@@ -368,10 +389,14 @@ class DerivedUnit:
         return Quantity(1, self)
 
     def multiplicative_inverse(self):
-        return DerivedUnit(None, {
-            base_unit: -exponent
-            for base_unit, exponent in self.unit_exponents.items()
-        })
+        return DerivedUnit(
+            None,
+            {
+                base_unit: -exponent
+                for base_unit, exponent in self.unit_exponents.items()
+            },
+            1 / self.factor
+        )
 
 
 @_total_ordering
