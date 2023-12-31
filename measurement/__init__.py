@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations as _annotations
 
 from collections.abc import Mapping as _Mapping
 from enum import Enum as _Enum
