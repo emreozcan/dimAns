@@ -237,16 +237,21 @@ class DerivedUnit:
         return cls(symbol, ref.unit_exponents, ref.factor * factor)
 
     def __str__(self):
-        # todo: Add display for self.factor
         if self.symbol:
             return self.symbol
-        return self._str_with_multiplicands()
+        if self.factor == 1:
+            return self._str_with_multiplicands()
+        return f"{self.factor} {self._str_with_multiplicands()}"
 
     def __repr__(self):
-        # todo: Add display for self.factor
         if self.symbol:
+            if self.factor != 1:
+                return (f"<{self.__class__.__name__} {self} "
+                        f"= {self.factor} {self._str_with_multiplicands()}>")
             return (f"<{self.__class__.__name__} {self} "
                     f"= {self._str_with_multiplicands()}>")
+        if self.factor != 1:
+            return f"<{self.__class__.__name__} {self.factor} {self}>"
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
