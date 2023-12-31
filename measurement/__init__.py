@@ -203,6 +203,13 @@ class Quantity:
             other
         )
 
+    def as_unit(self, symbol: str = None) -> DerivedUnit:
+        return DerivedUnit(
+            symbol,
+            self.unit.unit_exponents,
+            self.unit.factor * self.value
+        )
+
 
 @_total_ordering
 @_attrs.define(slots=True, frozen=True, repr=False, eq=False)
@@ -392,6 +399,9 @@ class DerivedUnit:
 
     def as_quantity(self) -> Quantity:
         return Quantity(1, self)
+
+    def as_unit(self, symbol: str = None) -> DerivedUnit:
+        return DerivedUnit.named(symbol, self)
 
     def multiplicative_inverse(self):
         return DerivedUnit(
