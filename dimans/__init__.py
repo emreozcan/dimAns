@@ -402,8 +402,8 @@ class BaseUnit(Unit):
     What the above statement means in layman's terms is that
     a base unit is a unit, which is not a combination of other units.
 
-    For example, the meter is a base unit, the second is a base unit, but
-    meters per second is not a base unit.
+    For example, the metre is a base unit, the second is a base unit, but
+    metres per second is not a base unit.
     """
 
     symbol: str

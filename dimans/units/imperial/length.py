@@ -1,9 +1,9 @@
 from fractions import Fraction as _Fraction
 
 from ... import BaseUnit as _BaseUnit
-from ..si_base.length import meter as _meter
+from ..si_base.length import metre as _metre
 
-foot = _BaseUnit.using(_meter, "ft", _Fraction(381, 1250))
+foot = _BaseUnit.using(_metre, "ft", _Fraction(381, 1250))
 
 twip = _BaseUnit.using(foot, "twip", _Fraction(1, 1780))
 thou = _BaseUnit.using(foot, "th", _Fraction(1, 12000))

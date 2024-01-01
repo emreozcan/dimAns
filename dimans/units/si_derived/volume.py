@@ -1,32 +1,32 @@
 from ... import DerivedUnit as _DerivedUnit
-from ..si_base.length import decimeter as _decimeter
+from ..si_base.length import decimetre as _decimetre
 from ..metric_utils import make_metric_units as _make_metric_units
 
-liter = _DerivedUnit.using(_decimeter ** 3, "L")
+litre = _DerivedUnit.using(_decimetre ** 3, "L")
 
 (
-    quettaliter,
-    yottaliter,
-    zettaliter,
-    exaliter,
-    petaliter,
-    teraliter,
-    gigaliter,
-    megaliter,
-    kiloliter,
-    hectoliter,
-    decaliter,
-    deciliter,
-    centiliter,
-    milliliter,
-    microliter,
-    nanoliter,
-    picoliter,
-    femtoliter,
-    attoliter,
-    zeptoliter,
-    yoctoliter,
-    rontoliter,
-    quectoliter,
-) = _make_metric_units(liter)
+    quettalitre,
+    yottalitre,
+    zettalitre,
+    exalitre,
+    petalitre,
+    teralitre,
+    gigalitre,
+    megalitre,
+    kilolitre,
+    hectolitre,
+    decalitre,
+    decilitre,
+    centilitre,
+    millilitre,
+    microlitre,
+    nanolitre,
+    picolitre,
+    femtolitre,
+    attolitre,
+    zeptolitre,
+    yoctolitre,
+    rontolitre,
+    quectolitre,
+) = _make_metric_units(litre)
 

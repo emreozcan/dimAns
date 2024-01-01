@@ -1,9 +1,9 @@
 from fractions import Fraction as _Fraction
 
 from ... import DerivedUnit as _DerivedUnit
-from ..si_derived.volume import milliliter as _milliliter
+from ..si_derived.volume import millilitre as _millilitre
 
-gallon = _DerivedUnit.using(_milliliter, "gal", _Fraction(454609, 100))
+gallon = _DerivedUnit.using(_millilitre, "gal", _Fraction(454609, 100))
 
 fluid_ounce = _DerivedUnit.using(gallon, "fl_oz", _Fraction(1, 160))
 gill = _DerivedUnit.using(fluid_ounce, "gi", _Fraction(5))
