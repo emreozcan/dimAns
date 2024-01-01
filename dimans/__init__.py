@@ -377,7 +377,7 @@ class DerivedUnit(Unit):
     def si_factor(self):
         factor = self.factor
         for base_unit, exponent in self.unit_exponents.items():
-            factor *= base_unit.si_factor ** exponent
+            factor *= base_unit.si_factor() ** exponent
         return factor
 
     def as_quantity(self) -> Quantity:
@@ -420,7 +420,7 @@ class BaseUnit(Unit):
     dimension: Dimension
     """The dimension of the unit."""
 
-    si_factor: Fraction
+    factor: Fraction
     """The factor by which the base SI unit of the dimension is multiplied by.
     """
 
@@ -508,4 +508,9 @@ class BaseUnit(Unit):
         cls,
         ref: Self, /, symbol: str | None = None, factor: Fraction | float = 1
     ) -> Self:
-        return cls(symbol, ref.dimension, ref.si_factor * factor)
+        return cls(symbol, ref.dimension, ref.si_factor() * factor)
+
+    def si_factor(self) -> Fraction | float:
+        return self.factor
+
+

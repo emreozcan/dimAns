@@ -50,7 +50,7 @@ def make_metric_units(unit: Unit) -> list[Unit]:
         unit.using(
             unit,
             symbol=prefix.symbol + unit.symbol,
-            factor=unit.si_factor * prefix.factor,
+            factor=unit.si_factor() * prefix.factor,
         )
         for prefix in metric_prefixes
     ]
