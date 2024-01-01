@@ -47,6 +47,7 @@ class Dimensional(ABC):
 
 class Unit(Dimensional, ABC):
     symbol: str | None
+    factor: Fraction | float
 
     def conversion_factor_to(self, other: Unit, /):
         """Get the conversion factor from this unit to another unit.
