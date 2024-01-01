@@ -1,10 +1,10 @@
 from fractions import Fraction as _Fraction
 
-from ... import BaseUnit as _BaseUnit, Dimension as _Dimension
+from ... import BaseUnit as _BaseUnit
 from ..metric_utils import make_metric_units as _make_metric_units
-from ...dimension import dimensions
+from ...dimension import dimensions as _dimensions
 
-meter = _BaseUnit("m", dimensions["length"], _Fraction(1))
+meter = _BaseUnit("m", _dimensions["length"], _Fraction(1))
 
 (
     quettameter,

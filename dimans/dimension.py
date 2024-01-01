@@ -91,7 +91,7 @@ class DimensionRegistry(MutableMapping[str, Dimension]):
         return self._dimensions.__iter__()
 
 
-dimensions = DimensionRegistry()
+dimensions: DimensionRegistry = DimensionRegistry()
 dimensions.register("mass", "M")
 dimensions.register("length", "L")
 dimensions.register("luminous intensity", "J")
