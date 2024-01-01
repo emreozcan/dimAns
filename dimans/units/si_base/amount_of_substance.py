@@ -1,9 +1,10 @@
 from fractions import Fraction as _Fraction
 
-from ... import BaseUnit as _BaseUnit, Dimension as _Dimension
+from ... import BaseUnit as _BaseUnit
 from ..metric_utils import make_metric_units as _make_metric_units
+from ...dimension import dimensions
 
-mole = _BaseUnit("mol", _Dimension.AMOUNT_OF_SUBSTANCE, _Fraction(1))
+mole = _BaseUnit("mol", dimensions["amount of substance"], _Fraction(1))
 
 (
     quettamole,

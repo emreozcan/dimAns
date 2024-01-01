@@ -2,8 +2,9 @@ from fractions import Fraction as _Fraction
 
 from ... import BaseUnit as _BaseUnit, Dimension as _Dimension
 from ..metric_utils import make_metric_units as _make_metric_units
+from ...dimension import dimensions
 
-gram = _BaseUnit("g", _Dimension.MASS, _Fraction(1))
+gram = _BaseUnit("g", dimensions["mass"], _Fraction(1))
 
 (
     quettagram,

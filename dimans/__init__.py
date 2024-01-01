@@ -1,18 +1,20 @@
 from __future__ import annotations as _annotations
 
 from collections.abc import Mapping as _Mapping
-from enum import Enum as _Enum
 from fractions import Fraction as _Fraction
 from functools import total_ordering as _total_ordering
 from numbers import Rational as _Rational, Real as _Real
-from typing import Any as _Any
+from typing import Any as _Any, Self
 
 import attrs as _attrs
+
+from .abc import Unit, Dimensional
+from .dimension import Dimensions, Dimension
 
 
 @_total_ordering
 @_attrs.define(slots=True, frozen=True, repr=False, eq=False)
-class Quantity:
+class Quantity(Dimensional):
     value: _Real
     unit: DerivedUnit
 
@@ -212,8 +214,10 @@ class Quantity:
 
 
 @_total_ordering
-@_attrs.define(slots=True, frozen=True, repr=False, eq=False)
-class DerivedUnit:
+@_attrs.define(
+    slots=True, frozen=True, repr=False, eq=False, hash=True
+)
+class DerivedUnit(Unit):
     """Represents a product of one or more base units."""
     symbol: str | None
     unit_exponents: _Mapping[BaseUnit, _Fraction | float]
@@ -237,10 +241,8 @@ class DerivedUnit:
     @classmethod
     def using(
         cls,
-        ref: DerivedUnit,
-        symbol: str | None,
-        factor: _Fraction = _Fraction(1),
-    ):
+        ref: Self, /, symbol: str | None = None, factor: _Fraction | float = 1
+    ) -> Self:
         return cls(symbol, ref.unit_exponents, ref.factor * factor)
 
     def __str__(self):
@@ -363,39 +365,13 @@ class DerivedUnit:
         return dimensions
 
     def dimensions(self):
-        return Dimensions.from_map(self.dimension_map())
+        return Dimensions(self.dimension_map())
 
     def si_factor(self):
         factor = self.factor
         for base_unit, exponent in self.unit_exponents.items():
             factor *= base_unit.si_factor ** exponent
         return factor
-
-    def conversion_factor_to(self, other: DerivedUnit | BaseUnit, /):
-        """Get the conversion factor from this unit to another unit.
-
-        This method returns the factor
-        by which a measurement in this unit must be multiplied
-        to get a measurement in the other unit.
-        """
-        if isinstance(other, BaseUnit):
-            other = other.as_derived_unit()
-        if self.dimensions() != other.dimensions():
-            raise ValueError(f"units must have the same dimensions")
-        return self.si_factor() / other.si_factor()
-
-    def conversion_factor_from(self, other: DerivedUnit | BaseUnit, /):
-        """Get the conversion factor from another unit to this unit.
-
-        This method returns the factor
-        by which a measurement in the other unit must be multiplied
-        to get a measurement in this unit.
-        """
-        if isinstance(other, BaseUnit):
-            other = other.as_derived_unit()
-        if self.dimensions() != other.dimensions():
-            raise ValueError(f"units must have the same dimensions")
-        return other.si_factor() / self.si_factor()
 
     def as_quantity(self) -> Quantity:
         return Quantity(1, self)
@@ -410,10 +386,15 @@ class DerivedUnit:
             1 / self.factor
         )
 
+    def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
+        return DerivedUnit.named(symbol, self)
+
 
 @_total_ordering
-@_attrs.define(slots=True, frozen=True, repr=False, eq=False, hash=True)
-class BaseUnit:
+@_attrs.define(
+    slots=True, frozen=True, repr=False, eq=False, hash=True
+)
+class BaseUnit(Unit):
     """A unit of measurement which only has one dimension of power 1.
 
     What the above statement means in layman's terms is that
@@ -500,46 +481,14 @@ class BaseUnit:
         return NotImplemented
     # endregion
 
-    def _check_compatible(self, other: _Any, /):
-        if not isinstance(other, BaseUnit):
-            raise TypeError(f"expected BaseUnit, "
-                            f"got {other.__class__.__name__}")
-        if self.dimension != other.dimension:
-            raise ValueError(f"{self.dimension} unit not compatible with "
-                             f"{other.dimension} unit")
-
     def dimension_map(self):
         return {self.dimension: _Fraction(1)}
 
     def dimensions(self):
-        return Dimensions.from_map(self.dimension_map())
+        return Dimensions(self.dimension_map())
 
-    def conversion_factor_to(self, other: BaseUnit | DerivedUnit, /):
-        """Get the conversion factor from this unit to another unit.
-
-        This method returns the factor
-        by which a measurement in this unit must be multiplied
-        to get a measurement in the other unit.
-        """
-        if isinstance(other, DerivedUnit):
-            return self.as_derived_unit().conversion_factor_to(other)
-        self._check_compatible(other)
-        return self.si_factor / other.si_factor
-
-    def conversion_factor_from(self, other: BaseUnit | DerivedUnit, /):
-        """Get the conversion factor from another unit to this unit.
-
-        This method returns the factor
-        by which a measurement in the other unit must be multiplied
-        to get a measurement in this unit.
-        """
-        if isinstance(other, DerivedUnit):
-            return self.as_derived_unit().conversion_factor_from(other)
-        self._check_compatible(other)
-        return other.si_factor / self.si_factor
-
-    def as_derived_unit(self) -> DerivedUnit:
-        return DerivedUnit(None, {self: 1})
+    def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
+        return DerivedUnit(symbol, {self: 1})
 
     def as_quantity(self) -> Quantity:
         return Quantity(1, self.as_derived_unit())
@@ -548,62 +497,8 @@ class BaseUnit:
         return DerivedUnit(None, {self: -1})
 
     @classmethod
-    def using(cls, ref: BaseUnit, symbol: str, factor: _Fraction):
+    def using(
+        cls,
+        ref: Self, /, symbol: str | None = None, factor: _Fraction | float = 1
+    ) -> Self:
         return cls(symbol, ref.dimension, ref.si_factor * factor)
-
-
-@_attrs.define(slots=True, frozen=True, repr=False)
-class Dimensions:
-    mass: _Fraction | float = _Fraction(0)
-    length: _Fraction | float = _Fraction(0)
-    luminous_intensity: _Fraction | float = _Fraction(0)
-    time: _Fraction | float = _Fraction(0)
-    electric_current: _Fraction | float = _Fraction(0)
-    temperature: _Fraction | float = _Fraction(0)
-    amount_of_substance: _Fraction | float = _Fraction(0)
-
-    def __str__(self):
-        if all(exponent == 0 for exponent in self.as_map().values()):
-            return "1"
-
-        return " ".join([
-            f"{dimension.value}^{exponent}"
-            for dimension, exponent in self.as_map().items()
-            if exponent != 0
-        ])
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} {self}>"
-
-    @classmethod
-    def from_map(cls, _map: _Mapping[Dimension, _Fraction | float]):
-        return cls(
-            _map.get(Dimension.MASS, _Fraction(0)),
-            _map.get(Dimension.LENGTH, _Fraction(0)),
-            _map.get(Dimension.LUMINOUS_INTENSITY, _Fraction(0)),
-            _map.get(Dimension.TIME, _Fraction(0)),
-            _map.get(Dimension.ELECTRIC_CURRENT, _Fraction(0)),
-            _map.get(Dimension.TEMPERATURE, _Fraction(0)),
-            _map.get(Dimension.AMOUNT_OF_SUBSTANCE, _Fraction(0)),
-        )
-
-    def as_map(self) -> _Mapping[Dimension, _Fraction | float]:
-        return {
-            Dimension.MASS: self.mass,
-            Dimension.LENGTH: self.length,
-            Dimension.LUMINOUS_INTENSITY: self.luminous_intensity,
-            Dimension.TIME: self.time,
-            Dimension.ELECTRIC_CURRENT: self.electric_current,
-            Dimension.TEMPERATURE: self.temperature,
-            Dimension.AMOUNT_OF_SUBSTANCE: self.amount_of_substance,
-        }
-
-
-class Dimension(_Enum):
-    MASS = "M"
-    LENGTH = "L"
-    LUMINOUS_INTENSITY = "J"
-    TIME = "T"
-    ELECTRIC_CURRENT = "I"
-    TEMPERATURE = "Θ"
-    AMOUNT_OF_SUBSTANCE = "N"

@@ -2,8 +2,9 @@ from fractions import Fraction as _Fraction
 
 from ... import BaseUnit as _BaseUnit, Dimension as _Dimension
 from ..metric_utils import make_metric_units as _make_metric_units
+from ...dimension import dimensions
 
-ampere = _BaseUnit("A", _Dimension.ELECTRIC_CURRENT, _Fraction(1))
+ampere = _BaseUnit("A", dimensions["electric current"], _Fraction(1))
 
 (
     quettaampere,

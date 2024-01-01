@@ -2,8 +2,9 @@ from fractions import Fraction as _Fraction
 
 from ... import BaseUnit as _BaseUnit, Dimension as _Dimension
 from ..metric_utils import make_metric_units as _make_metric_units
+from ...dimension import dimensions
 
-kelvin = _BaseUnit("K", _Dimension.TEMPERATURE, _Fraction(1))
+kelvin = _BaseUnit("K", dimensions["thermodynamic temperature"], _Fraction(1))
 
 (
     quettakelvin,
