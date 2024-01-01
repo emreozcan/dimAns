@@ -62,8 +62,7 @@ class Quantity(Dimensional):
     def __add__(self, other: Any, /):
         if isinstance(other, Quantity):
             if self.unit != other.unit:
-                # todo: Remove this restriction.
-                raise ValueError(f"units must be the same")
+                return self + other.convert_to(self.unit)
             return Quantity(self.value + other.value, self.unit)
         return NotImplemented
 
@@ -110,10 +109,7 @@ class Quantity(Dimensional):
     def __divmod__(self, other: Any, /):
         if isinstance(other, Quantity):
             if self.unit != other.unit:
-                # todo: Remove this restriction.
-                #       Please note that dividing a Quantity by a Quantity
-                #       may result in a regular Integral.
-                raise ValueError(f"units must be the same")
+                return divmod(self.convert_to(other.unit), other)
             div_, mod_ = divmod(self.value, other.value)
             return div_, Quantity(mod_, self.unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
@@ -150,8 +146,7 @@ class Quantity(Dimensional):
     def __mod__(self, other: Any, /):
         if isinstance(other, Quantity):
             if self.unit != other.unit:
-                # todo: Remove this restriction.
-                raise ValueError(f"units must be the same")
+                return self.convert_to(other.unit) % other
             return Quantity(self.value % other.value, self.unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
             return self % other.as_quantity()
