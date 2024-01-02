@@ -38,6 +38,10 @@ class Dimensional(ABC):
     @abstractmethod
     def __pow__(self, power, modulo=None):
         pass
+
+    @abstractmethod
+    def sqrt(self) -> Self:
+        pass
     # endregion
 
 
