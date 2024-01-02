@@ -519,24 +519,23 @@ class BaseUnit(Unit):
 
     # region Comparison handlers
     def __eq__(self, other: Any, /):
-        if isinstance(other, DerivedUnit):
-            return self.as_derived_unit() == other
-        if isinstance(other, BaseUnit):
-            if self.dimension != other.dimension:
-                return False
-            if self.si_factor != other.si_factor:
-                return False
-            return True
-        return NotImplemented
+        if not isinstance(other, Unit):
+            return NotImplemented
+
+        if self.dimensions() != other.dimensions():
+            return False
+        if self.si_factor() != other.si_factor():
+            return False
+        return True
 
     def __gt__(self, other: Any, /):
-        if isinstance(other, DerivedUnit):
-            return self.as_derived_unit() > other
-        if isinstance(other, BaseUnit):
-            if self.dimension != other.dimension:
-                raise ValueError(f"units must have the same dimensions")
-            return self.si_factor > other.si_factor
-        return NotImplemented
+        if not isinstance(other, Unit):
+            return NotImplemented
+
+        if self.dimensions() != other.dimensions():
+            return ValueError(f"units must have the same dimensions")
+
+        return self.si_factor() > other.si_factor()
     # endregion
 
     def dimensions(self):
