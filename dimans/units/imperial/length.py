@@ -5,7 +5,7 @@ from ..si_base.metre import metre as _metre
 
 foot = _BaseUnit.using(_metre, "ft", _Fraction(381, 1250))
 
-twip = _BaseUnit.using(foot, "twip", _Fraction(1, 1780))
+twip = _BaseUnit.using(foot, "twip", _Fraction(1, 17280))
 thou = _BaseUnit.using(foot, "th", _Fraction(1, 12000))
 barleycorn = _BaseUnit.using(foot, "barleycorn", _Fraction(1, 36))
 inch = _BaseUnit.using(foot, "in", _Fraction(1, 12))
@@ -18,7 +18,7 @@ mile = _BaseUnit.using(foot, "mi", _Fraction(5280))
 league = _BaseUnit.using(foot, "lea", _Fraction(15840))
 
 # Maritime units
-fathom = _BaseUnit.using(foot, "ftm", _Fraction(60671, 10000))
+fathom = _BaseUnit.using(_metre, "ftm", _Fraction(1852, 1000))
 cable = _BaseUnit.using(fathom, "cable", _Fraction(100))
 nautical_mile = _BaseUnit.using(cable, "nmi", _Fraction(10))
 
