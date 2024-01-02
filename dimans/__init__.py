@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from fractions import Fraction
 from functools import total_ordering
-from numbers import Rational, Real
+from numbers import Rational, Real, Number
 from typing import Any, Self
 
 import attrs
@@ -199,12 +199,15 @@ class Quantity(Dimensional):
             other = other.as_derived_unit()
         if self.unit.dimensions() != other.dimensions():
             raise ValueError(f"target unit must have the same dimensions")
-        return Quantity(
-            self.value * self.unit.conversion_factor_to(other),
-            other
-        )
+        factor, offset = self.unit.conversion_parameters_to(other)
+        return Quantity(self.value * factor + offset, other)
 
     def as_derived_unit(self, symbol: str = None) -> DerivedUnit:
+        if self.unit.si_offset() != 0:
+            raise ValueError(
+                "converting a quantity with an offset unit to a derived unit "
+                "doesn't make sense"
+            )
         return DerivedUnit(
             symbol,
             self.unit.unit_exponents,
@@ -221,6 +224,7 @@ class DerivedUnit(Unit):
     symbol: str | None
     unit_exponents: Mapping[BaseUnit, Fraction | float]
     factor: Fraction = Fraction(1)
+    offset: Fraction = Fraction(0)
 
     @classmethod
     def named(
@@ -228,39 +232,53 @@ class DerivedUnit(Unit):
         symbol: str,
         exponents_or_unit: Mapping[BaseUnit, Fraction | float] | DerivedUnit,
         /
-    ):
+    ) -> Self:
         if isinstance(exponents_or_unit, DerivedUnit):
             return cls(
                 symbol,
                 exponents_or_unit.unit_exponents,
-                exponents_or_unit.factor
+                exponents_or_unit.factor,
+                exponents_or_unit.offset,
             )
         return cls(symbol, exponents_or_unit)
 
     @classmethod
     def using(
         cls,
-        ref: Self, /, symbol: str | None = None, factor: Fraction | float = 1
+        ref: Self, /,
+        symbol: str | None = None,
+        factor: Fraction | float = Fraction(1),
+        offset: Fraction | float = Fraction(0),
     ) -> Self:
-        return cls(symbol, ref.unit_exponents, ref.factor * factor)
+        return cls(
+            symbol,
+            ref.unit_exponents,
+            ref.factor * factor,
+            ref.offset + offset,
+        )
 
     def __str__(self):
         if self.symbol:
             return self.symbol
         if self.factor == 1:
+            if self.offset != 0:
+                return f"{self._str_with_multiplicands()} + {self.offset}"
             return self._str_with_multiplicands()
-        return f"{self.factor} {self._str_with_multiplicands()}"
+        if self.offset == 0:
+            return f"{self.factor} {self._str_with_multiplicands()}"
+        return f"{self.factor} {self._str_with_multiplicands()} + {self.offset}"
 
     def __repr__(self):
+        if self.factor == 1:
+            _expr = self._str_with_multiplicands()
+        else:
+            _expr = f"{self.factor} {self._str_with_multiplicands()}"
+        if self.offset != 0:
+            _expr += f" + {self.offset}"
+
         if self.symbol:
-            if self.factor != 1:
-                return (f"<{self.__class__.__name__} {self} "
-                        f"= {self.factor} {self._str_with_multiplicands()}>")
-            return (f"<{self.__class__.__name__} {self} "
-                    f"= {self._str_with_multiplicands()}>")
-        if self.factor != 1:
-            return f"<{self.__class__.__name__} {self.factor} {self}>"
-        return f"<{self.__class__.__name__} {self}>"
+            return f"<{self.__class__.__name__} {self.symbol} = {_expr}>"
+        return f"<{self.__class__.__name__} {_expr}>"
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
@@ -308,6 +326,22 @@ class DerivedUnit(Unit):
         return NotImplemented
 
     __rmul__ = __mul__
+
+    def __add__(self, other: Any, /):
+        if isinstance(other, Number):
+            if isinstance(other, int):
+                other = Fraction(other)
+
+            return DerivedUnit(
+                symbol=None,
+                unit_exponents=self.unit_exponents,
+                factor=self.factor,
+                offset=self.offset + other
+            )
+
+        return NotImplemented
+
+    __radd__ = __add__
 
     def __truediv__(self, other: Any, /):
         if other == 1:
@@ -373,7 +407,7 @@ class DerivedUnit(Unit):
         return self.offset
 
     def as_quantity(self) -> Quantity:
-        return Quantity(1, self)
+        return Quantity(1 if not self.offset else 0, self)
 
     def multiplicative_inverse(self):
         return DerivedUnit(
@@ -445,6 +479,22 @@ class BaseUnit(Unit):
 
     __rmul__ = __mul__
 
+    def __add__(self, other: Any, /):
+        if isinstance(other, Number):
+            if isinstance(other, int):
+                other = Fraction(other)
+
+            return DerivedUnit(
+                symbol=None,
+                unit_exponents={self: Fraction(1)},
+                factor=Fraction(1),
+                offset=other
+            )
+
+        return NotImplemented
+
+    __radd__ = __add__
+
     def __truediv__(self, other: Any, /):
         if other == 1:
             return self
@@ -495,11 +545,18 @@ class BaseUnit(Unit):
     @classmethod
     def using(
         cls,
-        ref: Self, /, symbol: str | None = None, factor: Fraction | float = 1
+        ref: Self, /,
+        symbol: str | None = None,
+        factor: Fraction | float = Fraction(1),
     ) -> Self:
-        return cls(symbol, ref.dimension, ref.si_factor() * factor)
+        return cls(
+            symbol,
+            ref.dimension,
+            ref.si_factor() * factor,
+        )
 
     def si_factor(self) -> Fraction | float:
         return self.factor
 
-
+    def si_offset(self) -> Fraction | float:
+        return Fraction(0)

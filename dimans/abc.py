@@ -45,27 +45,37 @@ class Unit(Dimensional, ABC):
     symbol: str | None
     factor: Fraction | float
 
-    def conversion_factor_to(self, other: Unit, /):
-        """Get the conversion factor from this unit to another unit.
+    def conversion_parameters_to(self, other: Unit, /) \
+            -> tuple[Fraction | float, Fraction | float]:
+        """Get the conversion parameters from this unit to another unit.
 
-        This method returns the factor
-        by which a measurement in this unit must be multiplied
+        A measurement in terms of this unit must be multiplied with the first
+        element of the returned tuple,
+        and the second element must be added
         to get a measurement in the other unit.
         """
-        if self.dimension_map() != other.dimension_map():
+        if self.dimensions() != other.dimensions():
             raise ValueError(f"units must have the same dimensions")
-        return self.si_factor() / other.si_factor()
 
-    def conversion_factor_from(self, other: Unit, /):
-        """Get the conversion factor from another unit to this unit.
+        from_factor, to_factor = self.si_factor(), other.si_factor()
+        from_offset, to_offset = self.si_offset(), other.si_offset()
 
-        This method returns the factor
-        by which a measurement in the other unit must be multiplied
+        if to_offset == 0 and from_offset == 0:
+            return from_factor / to_factor, 0
+
+        factor = from_factor / to_factor
+        return factor, (from_offset * from_factor / to_factor - to_offset)
+
+    def conversion_parameters_from(self, other: Unit, /) \
+            -> tuple[Fraction | float, Fraction | float]:
+        """Get the conversion parameters from another unit to this unit.
+
+        A measurement in terms of the other unit must be multiplied with
+        the first element of the returned tuple,
+        and the second element must be added
         to get a measurement in this unit.
         """
-        if self.dimension_map() != other.dimension_map():
-            raise ValueError(f"units must have the same dimensions")
-        return other.si_factor() / self.si_factor()
+        return other.conversion_parameters_to(self)
 
     @abstractmethod
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
@@ -75,16 +85,12 @@ class Unit(Dimensional, ABC):
     def as_quantity(self) -> Quantity:
         pass
 
-    @classmethod
     @abstractmethod
-    def using(
-        cls,
-        ref: Self, /, symbol: str | None = None, factor: Fraction | float = 1
-    ) -> Self:
+    def si_factor(self) -> Fraction | float:
         pass
 
     @abstractmethod
-    def si_factor(self) -> Fraction | float:
+    def si_offset(self) -> Fraction | float:
         pass
 
     @abstractmethod
