@@ -11,10 +11,6 @@ if TYPE_CHECKING:
 
 class Dimensional(ABC):
     @abstractmethod
-    def dimension_map(self) -> dict[Dimension, Fraction | float]:
-        pass
-
-    @abstractmethod
     def dimensions(self) -> Dimensions:
         pass
 

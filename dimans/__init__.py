@@ -48,7 +48,7 @@ class Quantity(Dimensional):
     def __mul__(self, other: Any, /):
         if isinstance(other, Quantity):
             new_unit = self.unit * other.unit
-            if not new_unit.dimension_map():
+            if not new_unit.dimensions():
                 return self.value * other.value * new_unit.factor
             return Quantity(self.value * other.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
@@ -119,7 +119,7 @@ class Quantity(Dimensional):
     def __floordiv__(self, other: Any, /):
         if isinstance(other, Quantity):
             new_unit = self.unit / other.unit
-            if not new_unit.dimension_map():
+            if not new_unit.dimensions():
                 return self.value // other.value * new_unit.factor
             return Quantity(self.value // other.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
@@ -131,7 +131,7 @@ class Quantity(Dimensional):
     def __rfloordiv__(self, other: Any, /):
         if isinstance(other, Quantity):
             new_unit = other.unit / self.unit
-            if not new_unit.dimension_map():
+            if not new_unit.dimensions():
                 return other.value // self.value * new_unit.factor
             return Quantity(other.value // self.value, new_unit)
         if isinstance(other, (DerivedUnit, BaseUnit)):
@@ -162,7 +162,7 @@ class Quantity(Dimensional):
     # region Comparison handlers
     def __eq__(self, other: Any, /):
         if isinstance(other, Quantity):
-            if self.dimension_map() != other.dimension_map():
+            if self.dimensions() != other.dimensions():
                 return False
             if (self.value * self.unit.si_factor()
                     != other.value * other.unit.si_factor()):
@@ -172,15 +172,12 @@ class Quantity(Dimensional):
 
     def __gt__(self, other):
         if isinstance(other, Quantity):
-            if self.dimension_map() != other.dimension_map():
+            if self.dimensions() != other.dimensions():
                 raise ValueError(f"units must have the same dimensions")
             return (self.value * self.unit.si_factor()
                     > other.value * other.unit.si_factor())
         return NotImplemented
     # endregion
-
-    def dimension_map(self):
-        return self.unit.dimension_map()
 
     def dimensions(self):
         return self.unit.dimensions()
@@ -330,7 +327,7 @@ class DerivedUnit(Unit):
         if isinstance(other, BaseUnit):
             other = other.as_derived_unit()
         if isinstance(other, DerivedUnit):
-            if self.dimension_map() != other.dimension_map():
+            if self.dimensions() != other.dimensions():
                 return False
             if self.si_factor() != other.si_factor():
                 return False
@@ -341,7 +338,7 @@ class DerivedUnit(Unit):
         if isinstance(other, BaseUnit):
             other = other.as_derived_unit()
         if isinstance(other, DerivedUnit):
-            if self.dimension_map() != other.dimension_map():
+            if self.dimensions() != other.dimensions():
                 raise ValueError(f"units must have the same dimensions")
             return self.si_factor() > other.si_factor()
         return NotImplemented
@@ -355,7 +352,7 @@ class DerivedUnit(Unit):
             for base_unit, exponent in self.unit_exponents.items()
         ])
 
-    def dimension_map(self):
+    def dimensions(self):
         dimensions = {}
         for base_unit, exponent in self.unit_exponents.items():
             if base_unit.dimension not in dimensions:
@@ -364,16 +361,16 @@ class DerivedUnit(Unit):
                 dimensions[base_unit.dimension] += exponent
                 if dimensions[base_unit.dimension] == 0:
                     del dimensions[base_unit.dimension]
-        return dimensions
-
-    def dimensions(self):
-        return Dimensions(self.dimension_map())
+        return Dimensions(dimensions)
 
     def si_factor(self):
         factor = self.factor
         for base_unit, exponent in self.unit_exponents.items():
             factor *= base_unit.si_factor() ** exponent
         return factor
+
+    def si_offset(self) -> Fraction | float:
+        return self.offset
 
     def as_quantity(self) -> Quantity:
         return Quantity(1, self)
@@ -483,11 +480,8 @@ class BaseUnit(Unit):
         return NotImplemented
     # endregion
 
-    def dimension_map(self):
-        return {self.dimension: Fraction(1)}
-
     def dimensions(self):
-        return Dimensions(self.dimension_map())
+        return Dimensions({self.dimension: Fraction(1)})
 
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
         return DerivedUnit(symbol, {self: 1})

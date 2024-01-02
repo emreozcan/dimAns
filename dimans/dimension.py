@@ -125,9 +125,6 @@ class Dimensions(Mapping[Dimension, Fraction | float], Dimensional):
     def __repr__(self):
         return f"<{self.__class__.__name__} {self._map}>"
 
-    def dimension_map(self) -> dict[Dimension, Fraction | float]:
-        return self._map
-
     def dimensions(self) -> Self:
         return self
 
