@@ -1,4 +1,4 @@
-from ..si_base.time import second as _second
+from ..si_base.second import second as _second
 from .joule import joule as _joule
 from ..metric_utils import make_metric_units as _make_metric_units
 

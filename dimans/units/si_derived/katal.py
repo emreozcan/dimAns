@@ -1,5 +1,5 @@
-from ..si_base.time import second as _second
-from ..si_base.amount_of_substance import mole as _mole
+from ..si_base.second import second as _second
+from ..si_base.mole import mole as _mole
 from ..metric_utils import make_metric_units as _make_metric_units
 
 gray = (_mole / _second).as_derived_unit("Gy")

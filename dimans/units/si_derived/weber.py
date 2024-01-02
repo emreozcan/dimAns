@@ -1,5 +1,5 @@
 from ..si_derived.joule import joule as _joule
-from ..si_base.electric_current import ampere as _ampere
+from ..si_base.ampere import ampere as _ampere
 from ..metric_utils import make_metric_units as _make_metric_units
 
 weber = (_joule / _ampere).as_derived_unit("Wb")

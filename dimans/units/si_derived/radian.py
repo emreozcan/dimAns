@@ -1,4 +1,4 @@
-from ..si_base.length import metre as _metre
+from ..si_base.metre import metre as _metre
 from ..metric_utils import make_metric_units as _make_metric_units
 
 radian = (_metre / _metre).as_derived_unit("rad")

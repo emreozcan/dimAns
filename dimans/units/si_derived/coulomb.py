@@ -1,5 +1,5 @@
-from ..si_base.electric_current import ampere as _ampere
-from ..si_base.time import second as _second
+from ..si_base.ampere import ampere as _ampere
+from ..si_base.second import second as _second
 from ..metric_utils import make_metric_units as _make_metric_units
 
 coulomb = (_ampere * _second).as_derived_unit("C")

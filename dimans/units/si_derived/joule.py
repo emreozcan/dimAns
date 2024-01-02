@@ -1,4 +1,4 @@
-from ..si_base.length import metre as _metre
+from ..si_base.metre import metre as _metre
 from .newton import newton as _newton
 from ..metric_utils import make_metric_units as _make_metric_units
 

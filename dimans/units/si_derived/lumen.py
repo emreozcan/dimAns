@@ -1,4 +1,4 @@
-from ..si_base.luminous_intensity import candela as _candela
+from ..si_base.candela import candela as _candela
 from .steradian import steradian as _steradian
 from ..metric_utils import make_metric_units as _make_metric_units
 

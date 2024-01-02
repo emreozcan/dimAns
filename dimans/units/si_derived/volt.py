@@ -1,4 +1,4 @@
-from ..si_base.electric_current import ampere as _ampere
+from ..si_base.ampere import ampere as _ampere
 from ..si_derived.watt import watt as _watt
 from ..metric_utils import make_metric_units as _make_metric_units
 

@@ -1,5 +1,5 @@
 from ..si_derived.volt import volt as _volt
-from ..si_base.electric_current import ampere as _ampere
+from ..si_base.ampere import ampere as _ampere
 from ..metric_utils import make_metric_units as _make_metric_units
 
 ohm = (_volt / _ampere).as_derived_unit("Ω")

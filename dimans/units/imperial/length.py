@@ -1,7 +1,7 @@
 from fractions import Fraction as _Fraction
 
 from ... import BaseUnit as _BaseUnit
-from ..si_base.length import metre as _metre
+from ..si_base.metre import metre as _metre
 
 foot = _BaseUnit.using(_metre, "ft", _Fraction(381, 1250))
 

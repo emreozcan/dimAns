@@ -1,7 +1,7 @@
 from fractions import Fraction as _Fraction
 
 from ... import BaseUnit as _BaseUnit
-from ..si_base.mass import kilogram as _kilogram
+from ..si_base.gram import kilogram as _kilogram
 
 pound = _BaseUnit.using(_kilogram, "lb", _Fraction(45359237, 100000000))
 
