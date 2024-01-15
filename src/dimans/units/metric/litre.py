@@ -1,6 +1,6 @@
-from dimans import DerivedUnit as _DerivedUnit
-from dimans.units.si_base.metre import decimetre as _decimetre
-from dimans.units.metric_utils import make_metric_units as _make_metric_units
+from ... import DerivedUnit as _DerivedUnit
+from ...units.si_base.metre import decimetre as _decimetre
+from ...units.metric_utils import make_metric_units as _make_metric_units
 
 litre = _DerivedUnit.using(_decimetre ** 3, "L")
 
