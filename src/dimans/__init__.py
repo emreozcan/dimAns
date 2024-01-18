@@ -229,21 +229,6 @@ class DerivedUnit(Unit):
     factor: Fraction = Fraction(1)
     offset: Fraction = Fraction(0)
 
-    @classmethod
-    def named(
-        cls,
-        symbol: str,
-        exponents_or_unit: Mapping[BaseUnit, Fraction | float] | DerivedUnit,
-        /
-    ) -> Self:
-        if isinstance(exponents_or_unit, DerivedUnit):
-            return cls(
-                symbol,
-                exponents_or_unit.unit_exponents,
-                exponents_or_unit.factor,
-                exponents_or_unit.offset,
-            )
-        return cls(symbol, exponents_or_unit)
 
     @classmethod
     def using(
@@ -426,7 +411,12 @@ class DerivedUnit(Unit):
         )
 
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
-        return DerivedUnit.named(symbol, self)
+        return DerivedUnit(
+            symbol,
+            self.unit_exponents,
+            self.factor,
+            self.offset,
+        )
 
 
 @total_ordering
