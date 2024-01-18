@@ -347,28 +347,6 @@ class DerivedUnit(Unit):
         return other * self.multiplicative_inverse()
     # endregion
 
-    # region Comparison handlers
-    def __eq__(self, other: Any, /):
-        if isinstance(other, BaseUnit):
-            other = other.as_derived_unit()
-        if isinstance(other, DerivedUnit):
-            if self.dimensions() != other.dimensions():
-                return False
-            if self.si_factor() != other.si_factor():
-                return False
-            return True
-        return NotImplemented
-
-    def __gt__(self, other: Any, /):
-        if isinstance(other, BaseUnit):
-            other = other.as_derived_unit()
-        if isinstance(other, DerivedUnit):
-            if self.dimensions() != other.dimensions():
-                raise ValueError(f"units must have the same dimensions")
-            return self.si_factor() > other.si_factor()
-        return NotImplemented
-    # endregion
-
     def _str_with_multiplicands(self):
         if not self.unit_exponents:
             return "1"
@@ -507,27 +485,6 @@ class BaseUnit(Unit):
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
-    # endregion
-
-    # region Comparison handlers
-    def __eq__(self, other: Any, /):
-        if not isinstance(other, Unit):
-            return NotImplemented
-
-        if self.dimensions() != other.dimensions():
-            return False
-        if self.si_factor() != other.si_factor():
-            return False
-        return True
-
-    def __gt__(self, other: Any, /):
-        if not isinstance(other, Unit):
-            return NotImplemented
-
-        if self.dimensions() != other.dimensions():
-            raise ValueError(f"units must have the same dimensions")
-
-        return self.si_factor() > other.si_factor()
     # endregion
 
     def dimensions(self):

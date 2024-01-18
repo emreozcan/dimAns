@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from fractions import Fraction
-from typing import Self, TYPE_CHECKING
+from typing import Self, TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .dimension import Dimensions
@@ -100,6 +100,28 @@ class Unit(Dimensional, ABC):
     @abstractmethod
     def multiplicative_inverse(self) -> DerivedUnit:
         pass
+
+    # region Comparison handlers
+    def __eq__(self, other: Any, /):
+        if not isinstance(other, Unit):
+            return NotImplemented
+
+        if self.dimensions() != other.dimensions():
+            return False
+        if self.si_factor() != other.si_factor():
+            return False
+        return True
+
+    def __gt__(self, other: Any, /):
+        if not isinstance(other, Unit):
+            return NotImplemented
+
+        if self.dimensions() != other.dimensions():
+            raise ValueError(f"units must have the same dimensions")
+
+        return self.si_factor() > other.si_factor()
+
+    # endregion
 
 
 __all__ = [
