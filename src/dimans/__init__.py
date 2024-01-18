@@ -401,6 +401,8 @@ class DerivedUnit(Unit):
         return Quantity(1 if not self.offset else 0, self)
 
     def multiplicative_inverse(self):
+        if self.offset:
+            raise ValueError("can't invert offset unit")
         return DerivedUnit(
             None,
             {
