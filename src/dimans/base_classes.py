@@ -122,6 +122,26 @@ class Unit(Dimensional, ABC):
 
     # endregion
 
+    # These arithmetic operations are redefined
+    # from Dimensional for stricter typing.
+    @abstractmethod
+    def __add__(self, other) -> Unit:
+        pass
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    @abstractmethod
+    def __mul__(self, other) -> Unit | Quantity:
+        pass
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    @abstractmethod
+    def __pow__(self, power: int | Fraction | float, modulo=None) -> Unit:
+        pass
+
 
 __all__ = [
     "Dimensional",
