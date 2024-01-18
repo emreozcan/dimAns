@@ -51,7 +51,7 @@ class Quantity(Dimensional):
             if not new_unit.dimensions():
                 return self.value * other.value * new_unit.factor
             return Quantity(self.value * other.value, new_unit)
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return self * other.as_quantity()
         if isinstance(other, Real):
             return Quantity(self.value * other, self.unit)
@@ -88,7 +88,7 @@ class Quantity(Dimensional):
     def __truediv__(self, other: Any, /):
         if isinstance(other, Quantity):
             return self * other.multiplicative_inverse()
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return self / other.as_quantity()
         if isinstance(other, Real):
             return Quantity(self.value / other, self.unit)
@@ -97,7 +97,7 @@ class Quantity(Dimensional):
     def __rtruediv__(self, other: Any, /):
         if isinstance(other, Quantity):
             return self.multiplicative_inverse() * other
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return self.multiplicative_inverse() * other.as_quantity()
         if isinstance(other, Real):
             return Quantity(
@@ -112,7 +112,7 @@ class Quantity(Dimensional):
                 return divmod(self.convert_to(other.unit), other)
             div_, mod_ = divmod(self.value, other.value)
             return div_, Quantity(mod_, self.unit)
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return divmod(self, other.as_quantity())
         return NotImplemented
 
@@ -122,7 +122,7 @@ class Quantity(Dimensional):
             if not new_unit.dimensions():
                 return self.value // other.value * new_unit.factor
             return Quantity(self.value // other.value, new_unit)
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return self // other.as_quantity()
         if isinstance(other, Real):
             return Quantity(self.value // other, self.unit)
@@ -134,7 +134,7 @@ class Quantity(Dimensional):
             if not new_unit.dimensions():
                 return other.value // self.value * new_unit.factor
             return Quantity(other.value // self.value, new_unit)
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return other.as_quantity() // self
         if isinstance(other, Real):
             return Quantity(
@@ -148,7 +148,7 @@ class Quantity(Dimensional):
             if self.unit != other.unit:
                 return self.convert_to(other.unit) % other
             return Quantity(self.value % other.value, self.unit)
-        if isinstance(other, (DerivedUnit, BaseUnit)):
+        if isinstance(other, Unit):
             return self % other.as_quantity()
         return NotImplemented
 
@@ -188,7 +188,7 @@ class Quantity(Dimensional):
     def additive_inverse(self):
         return Quantity(-self.value, self.unit)
 
-    def convert_to(self, other: DerivedUnit | BaseUnit, /):
+    def convert_to(self, other: Unit, /):
         """Convert this quantity to another unit.
 
         This method returns a new Quantity
