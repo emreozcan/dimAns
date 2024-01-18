@@ -4,10 +4,10 @@ from ... import DerivedUnit
 from ..si_base.kelvin import kelvin
 
 __all__ = [
-    "celsius"
+    "fahrenheit"
 ]
 
-celsius = DerivedUnit(
+fahrenheit = DerivedUnit(
     "°F",
     {kelvin: Fraction(1)},
     Fraction(5, 9),

@@ -1,4 +1,5 @@
 from .becquerel import *
+from .celsius import *
 from .coulomb import *
 from .farad import *
 from .gray import *
