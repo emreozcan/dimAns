@@ -1,3 +1,39 @@
+[project]
+name = "dimans"
+description = "Dimensional analysis and unit conversion library"
+authors = [
+    {name = "Emre Özcan", email = "emre@emreis.com"},
+]
+maintainers = [
+    {name = "Emre Özcan", email = "emre@emreis.com"},
+]
+readme = "README.md"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering",
+]
+keywords = ["units", "calculation", "calculator", "constants"]
+requires-python = "~=3.7"
+license = { file = "LICENSE" }
+dependencies = [
+    "attrs ~=21.3",
+]
+dynamic = ["version",]
+
+[project.urls]
+Repository = "https://github.com/emreozcan/dimans"
+Issues = "https://github.com/emreozcan/dimans/issues"
+
+[build-system]
+requires = ["flit_core ~=3.2"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = ["src/"]
+
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",

@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-attrs = "*"
-pytest = "*"
+attrs = "~=21.3"
 
 [dev-packages]
-pytest = "*"
+pytest = "~=7.4"
+flit = "~=3.4"
