@@ -23,9 +23,8 @@ class Dimensional(ABC):
     def __mul__(self, other):
         pass
 
-    @abstractmethod
     def __rmul__(self, other):
-        pass
+        return self.__mul__(other)
 
     @abstractmethod
     def __truediv__(self, other):
@@ -39,9 +38,9 @@ class Dimensional(ABC):
     def __pow__(self, power, modulo=None):
         pass
 
-    @abstractmethod
+    # region Square root by pow
     def sqrt(self) -> Self:
-        pass
+        return self ** Fraction(1, 2)
     # endregion
 
 

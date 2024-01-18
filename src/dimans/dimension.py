@@ -181,9 +181,6 @@ class Dimensions(Mapping[Dimension, Fraction | float], Dimensional):
         else:
             return NotImplemented
 
-    def sqrt(self) -> Self:
-        return self ** Fraction(1, 2)
-
     def __neg__(self):
         return self
 

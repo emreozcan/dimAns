@@ -32,9 +32,6 @@ class Quantity(Dimensional):
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
-    def sqrt(self) -> Self:
-        return self ** Fraction(1, 2)
-
     def __pow__(self, power: int | Fraction | float, modulo=None):
         if not isinstance(power, float):
             if not isinstance(power, Rational):
@@ -269,9 +266,6 @@ class DerivedUnit(Unit):
         return f"<{self.__class__.__name__} {_expr}>"
 
     # region Arithmetic operation handlers
-    def sqrt(self):
-        return self ** Fraction(1, 2)
-
     def __pow__(self, power: int | Fraction | float, modulo=None):
         if not isinstance(power, float):
             if not isinstance(power, Rational):
@@ -316,8 +310,6 @@ class DerivedUnit(Unit):
             return Quantity(other, self)
         return NotImplemented
 
-    __rmul__ = __mul__
-
     def __add__(self, other: Any, /):
         if isinstance(other, Number):
             if isinstance(other, int):
@@ -331,8 +323,6 @@ class DerivedUnit(Unit):
             )
 
         return NotImplemented
-
-    __radd__ = __add__
 
     def __truediv__(self, other: Any, /):
         if other == 1:
@@ -433,9 +423,6 @@ class BaseUnit(Unit):
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
-    def sqrt(self) -> Self:
-        return self ** Fraction(1, 2)
-
     def __pow__(self, power: int | Fraction | float, modulo=None):
         if not isinstance(power, float):
             if not isinstance(power, Rational):
@@ -456,8 +443,6 @@ class BaseUnit(Unit):
             return Quantity(other, self.as_derived_unit())
         return NotImplemented
 
-    __rmul__ = __mul__
-
     def __add__(self, other: Any, /):
         if isinstance(other, Number):
             if isinstance(other, int):
@@ -471,8 +456,6 @@ class BaseUnit(Unit):
             )
 
         return NotImplemented
-
-    __radd__ = __add__
 
     def __truediv__(self, other: Any, /):
         if other == 1:
