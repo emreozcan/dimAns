@@ -64,6 +64,8 @@ class Quantity(Dimensional):
             if self.unit != other.unit:
                 return self + other.convert_to(self.unit)
             return Quantity(self.value + other.value, self.unit)
+        if other == 0:  # This allows using sum() on a list of quantities.
+            return self
         return NotImplemented
 
     __radd__ = __add__
