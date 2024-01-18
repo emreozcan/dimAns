@@ -499,7 +499,7 @@ class BaseUnit(Unit):
     def __truediv__(self, other: Any, /):
         if other == 1:
             return self
-        if isinstance(other, BaseUnit):
+        if isinstance(other, Unit):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
