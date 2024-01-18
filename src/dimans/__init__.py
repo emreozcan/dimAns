@@ -198,6 +198,8 @@ class Quantity(Dimensional):
         if self.unit.dimensions() != other.dimensions():
             raise ValueError(f"target unit must have the same dimensions")
         factor, offset = self.unit.conversion_parameters_to(other)
+        if not isinstance(other, DerivedUnit):
+            other = other.as_derived_unit()
         return Quantity(self.value * factor + offset, other)
 
     def as_derived_unit(self, symbol: str = None) -> DerivedUnit:
