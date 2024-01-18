@@ -5,7 +5,7 @@ from typing import overload, Self, TYPE_CHECKING
 
 import attrs
 
-from .abc import Dimensional
+from .base_classes import Dimensional
 
 
 @attrs.define(slots=True, frozen=True, repr=False)

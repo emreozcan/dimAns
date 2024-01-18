@@ -2,7 +2,7 @@ from fractions import Fraction
 
 import attrs
 
-from ..abc import Unit
+from ..base_classes import Unit
 
 __all__ = [
     "MetricPrefix",

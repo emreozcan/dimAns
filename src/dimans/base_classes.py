@@ -5,7 +5,7 @@ from fractions import Fraction
 from typing import Self, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .dimension import Dimension, Dimensions
+    from .dimension import Dimensions
     from . import DerivedUnit, Quantity
 
 

@@ -8,7 +8,7 @@ from typing import Any, Self
 
 import attrs
 
-from .abc import Unit, Dimensional
+from .base_classes import Unit, Dimensional
 from .dimension import Dimensions, Dimension
 
 
