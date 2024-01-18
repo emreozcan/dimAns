@@ -18,6 +18,8 @@ __all__ = [
     "BaseUnit",
 ]
 
+__version__ = "0.0.1"
+
 
 @total_ordering
 @attrs.define(slots=True, frozen=True, repr=False, eq=False)
