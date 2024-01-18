@@ -122,8 +122,6 @@ class Unit(Dimensional, ABC):
 
     # endregion
 
-    # These arithmetic operations are redefined
-    # from Dimensional for stricter typing.
     @abstractmethod
     def __add__(self, other) -> Unit:
         pass
@@ -131,6 +129,11 @@ class Unit(Dimensional, ABC):
     def __radd__(self, other):
         return self.__add__(other)
 
+    def __sub__(self, other):
+        return self.__add__(-other)
+
+    # These arithmetic operations are redefined
+    # from Dimensional for stricter typing.
     @abstractmethod
     def __mul__(self, other) -> Unit | Quantity:
         pass
