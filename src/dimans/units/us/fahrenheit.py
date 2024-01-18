@@ -1,7 +1,7 @@
 from fractions import Fraction
 
 from ... import DerivedUnit
-from units.si_base.kelvin import kelvin
+from ..si_base.kelvin import kelvin
 
 __all__ = [
     "celsius"
