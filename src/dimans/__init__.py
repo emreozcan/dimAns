@@ -195,8 +195,6 @@ class Quantity(Dimensional):
         which is equivalent to this quantity
         but in the other unit.
         """
-        if isinstance(other, BaseUnit):
-            other = other.as_derived_unit()
         if self.unit.dimensions() != other.dimensions():
             raise ValueError(f"target unit must have the same dimensions")
         factor, offset = self.unit.conversion_parameters_to(other)
@@ -282,6 +280,8 @@ class DerivedUnit(Unit):
         )
 
     def __mul__(self, other: Any, /):
+        if isinstance(other, BaseUnit):
+            other = other.as_derived_unit()
         if isinstance(other, DerivedUnit):
             base_units = []
             for unit in self.unit_exponents.keys():
