@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from fractions import Fraction
 from functools import total_ordering
 from numbers import Rational, Real, Number
@@ -203,6 +203,25 @@ class Quantity(Dimensional):
         if not isinstance(other, DerivedUnit):
             other = other.as_derived_unit()
         return Quantity(self.value * factor + offset, other)
+
+    def convert_to_terms(
+        self,
+        units: Sequence[Unit],
+        sort=False
+    ) -> list[Quantity]:
+        """Convert this quantity to other units.
+
+        This method returns a list of Quantity objects in the given units,
+        the sum of which are equivalent to this quantity.
+        """
+        if sort:
+            units = sorted(units, reverse=True)
+        remaining = self
+        quantities = []
+        for unit in units:
+            result, remaining = divmod(remaining, unit)
+            quantities.append(result * unit)
+        return quantities
 
     def as_derived_unit(self, symbol: str = None) -> DerivedUnit:
         if self.unit.si_offset() != 0:
