@@ -525,7 +525,7 @@ class BaseUnit(Unit):
             return NotImplemented
 
         if self.dimensions() != other.dimensions():
-            return ValueError(f"units must have the same dimensions")
+            raise ValueError(f"units must have the same dimensions")
 
         return self.si_factor() > other.si_factor()
     # endregion
