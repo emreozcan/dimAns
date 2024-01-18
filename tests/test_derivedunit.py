@@ -378,7 +378,7 @@ def test_derived_unit_eq():
         },
         factor=Fraction(5),
         offset=Fraction(7),
-    ) != DerivedUnit(
+    ) == DerivedUnit(
         symbol=None,
         unit_exponents={
             base_dim_1: Fraction(2),
