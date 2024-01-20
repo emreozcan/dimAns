@@ -192,13 +192,15 @@ class Quantity(Dimensional):
     def additive_inverse(self):
         return Quantity(-self.value, self.unit)
 
-    def convert_to(self, other: Unit, /):
+    def convert_to(self, other: Unit | Quantity, /):
         """Convert this quantity to another unit.
 
         This method returns a new Quantity
         which is equivalent to this quantity
         but in the other unit.
         """
+        if isinstance(other, Quantity):
+            other = other.as_derived_unit()
         if self.unit.dimensions() != other.dimensions():
             raise ValueError(f"target unit must have the same dimensions")
         factor, offset = self.unit.conversion_parameters_to(other)
