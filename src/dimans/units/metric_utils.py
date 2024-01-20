@@ -3,6 +3,7 @@ from fractions import Fraction
 import attrs
 
 from ..base_classes import Unit
+from .. import DerivedUnit, BaseUnit
 
 __all__ = [
     "MetricPrefix",
@@ -46,11 +47,16 @@ metric_prefixes = [
 
 
 def make_metric_units(unit: Unit) -> list[Unit]:
+    if not isinstance(unit, BaseUnit):
+        return [
+            (prefix.factor * unit).as_derived_unit(prefix.symbol + unit.symbol)
+            for prefix in metric_prefixes
+        ]
     return [
-        unit.using(
+        BaseUnit.using(
             unit,
             symbol=prefix.symbol + unit.symbol,
-            factor=unit.factor * prefix.factor,
+            factor=prefix.factor * unit.factor,
         )
         for prefix in metric_prefixes
     ]
