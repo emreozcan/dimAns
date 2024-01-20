@@ -1,7 +1,7 @@
 from fractions import Fraction as _Fraction
 
 from ... import DerivedUnit as _DerivedUnit
-from ...units.metric.litre import millilitre as _millilitre
+from ..metric.litre import millilitre as _millilitre
 
 gallon = _DerivedUnit.using(_millilitre, "gal", _Fraction(454609, 100))
 
