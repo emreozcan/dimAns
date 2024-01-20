@@ -1,14 +1,18 @@
+from collections.abc import Sequence
 from fractions import Fraction
 
 import attrs
 
 from ..base_classes import Unit
-from .. import DerivedUnit, BaseUnit
+from .. import BaseUnit
 
 __all__ = [
     "MetricPrefix",
     "metric_prefixes",
+    "binary_metric_prefixes",
     "make_metric_units",
+    "make_binary_metric_units",
+    "map_to_units",
 ]
 
 
@@ -46,17 +50,39 @@ metric_prefixes = [
 ]
 
 
-def make_metric_units(unit: Unit) -> list[Unit]:
+binary_metric_prefixes = [
+    MetricPrefix("kibi", "Ki", Fraction(2 ** 10)),
+    MetricPrefix("mebi", "Mi", Fraction(2 ** 20)),
+    MetricPrefix("gibi", "Gi", Fraction(2 ** 30)),
+    MetricPrefix("tebi", "Ti", Fraction(2 ** 40)),
+    MetricPrefix("pebi", "Pi", Fraction(2 ** 50)),
+    MetricPrefix("exbi", "Ei", Fraction(2 ** 60)),
+    MetricPrefix("zebi", "Zi", Fraction(2 ** 70)),
+    MetricPrefix("yobi", "Yi", Fraction(2 ** 80)),
+]
+
+
+def map_to_units(unit: Unit, prefix_list: Sequence[MetricPrefix]) -> list[Unit]:
     if not isinstance(unit, BaseUnit):
         return [
             (prefix.factor * unit).as_derived_unit(prefix.symbol + unit.symbol)
-            for prefix in metric_prefixes
+            for prefix in prefix_list
         ]
+    if unit.dimension.name == "data":
+        pass
     return [
-        BaseUnit.using(
-            unit,
+        BaseUnit(
             symbol=prefix.symbol + unit.symbol,
             factor=prefix.factor * unit.factor,
+            dimension=unit.dimension,
         )
-        for prefix in metric_prefixes
+        for prefix in prefix_list
     ]
+
+
+def make_metric_units(unit: Unit) -> list[Unit]:
+    return map_to_units(unit, metric_prefixes)
+
+
+def make_binary_metric_units(unit: Unit) -> list[Unit]:
+    return map_to_units(unit, binary_metric_prefixes)
