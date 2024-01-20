@@ -499,13 +499,13 @@ class BaseUnit(Unit):
         return Dimensions({self.dimension: Fraction(1)})
 
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
-        return DerivedUnit(symbol, {self: 1})
+        return DerivedUnit(symbol, {self: Fraction(1)})
 
     def as_quantity(self) -> Quantity:
-        return Quantity(1, self.as_derived_unit())
+        return Quantity(Fraction(1), self.as_derived_unit())
 
     def multiplicative_inverse(self) -> DerivedUnit:
-        return DerivedUnit(None, {self: -1})
+        return DerivedUnit(None, {self: Fraction(-1)})
 
     @classmethod
     def using(
