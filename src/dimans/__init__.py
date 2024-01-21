@@ -22,6 +22,21 @@ __version__ = "0.0.8"
 __version__ = "0.0.9"
 
 
+def mul(
+    a: int | float | Decimal | Fraction,
+    b: int | float | Decimal | Fraction, /
+) -> int | float | Decimal | Fraction:
+    if isinstance(a, Decimal):
+        if isinstance(b, Decimal):
+            return a * b
+        return a * Decimal(b)
+    if isinstance(b, Decimal):
+        if isinstance(a, Decimal):
+            return a * b
+        return Decimal(a) * b
+    return a * b
+
+
 @total_ordering
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class Quantity(Dimensional):
@@ -49,14 +64,14 @@ class Quantity(Dimensional):
 
     def __mul__(self, other: Any, /):
         if isinstance(other, Quantity):
-            new_unit = self.unit * other.unit
+            new_unit: DerivedUnit = self.unit * other.unit
             if not new_unit.dimensions():
-                return self.value * other.value * new_unit.factor
-            return Quantity(self.value * other.value, new_unit)
+                return mul(self.value, other.value) * new_unit.factor
+            return Quantity(mul(self.value, other.value), new_unit)
         if isinstance(other, Unit):
             return self * other.as_quantity()
         if isinstance(other, (Real, Decimal)):
-            return Quantity(self.value * other, self.unit)
+            return Quantity(mul(self.value, other), self.unit)
         return NotImplemented
 
     __rmul__ = __mul__
@@ -206,7 +221,7 @@ class Quantity(Dimensional):
         factor, offset = self.unit.conversion_parameters_to(other)
         if not isinstance(other, DerivedUnit):
             other = other.as_derived_unit()
-        return Quantity(self.value * factor + offset, other)
+        return Quantity(mul(self.value, factor) + offset, other)
 
     def convert_to_terms(
         self,
