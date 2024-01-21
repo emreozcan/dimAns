@@ -66,7 +66,7 @@ class Quantity(Dimensional):
         if isinstance(other, Quantity):
             new_unit: DerivedUnit = self.unit * other.unit
             if not new_unit.dimensions():
-                return mul(self.value, other.value) * new_unit.factor
+                return mul(self.value, other.value) * new_unit.si_factor()
             return Quantity(mul(self.value, other.value), new_unit)
         if isinstance(other, Unit):
             return self * other.as_quantity()
