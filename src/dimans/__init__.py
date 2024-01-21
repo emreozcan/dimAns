@@ -19,6 +19,7 @@ __all__ = [
 ]
 
 __version__ = "0.0.8"
+__version__ = "0.0.9"
 
 
 @total_ordering
@@ -28,11 +29,10 @@ class Quantity(Dimensional):
     unit: DerivedUnit
 
     def __str__(self):
-        if isinstance(self.unit, BaseUnit):
-            return f"{self.value} {self.unit}"
-        if isinstance(self.unit, DerivedUnit) and self.unit.factor == 0:
-            return f"{self.value} {self.unit}"
-        return f"{self.value} × {self.unit}"
+        unit_str = str(self.unit)
+        if unit_str[0].isdigit():
+            return f"{self.value} × {unit_str}"
+        return f"{self.value} {unit_str}"
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self}>"
