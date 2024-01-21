@@ -9,9 +9,9 @@ from dimans.dimension import Dimension, Dimensions
 dim_1 = Dimension("dim_1", "dim_1")
 dim_2 = Dimension("dim_2", "dim_2")
 
-base_dim_1 = BaseUnit("base_dim_1", dim_1, 1)
-base_dim_1_alt = BaseUnit("base_dim_1_alt", dim_1, 1)
-base_dim_2 = BaseUnit("base_dim_2", dim_2, 1)
+base_dim_1 = BaseUnit("base_dim_1", dim_1, Fraction(1))
+base_dim_1_alt = BaseUnit("base_dim_1_alt", dim_1, Fraction(1))
+base_dim_2 = BaseUnit("base_dim_2", dim_2, Fraction(1))
 
 derived_complicated = DerivedUnit(
     symbol="derived_complicated",
@@ -196,20 +196,24 @@ def test_derived_unit_dimensions():
         }
     )
 
-    assert DerivedUnit(
-        symbol=None,
-        unit_exponents={
-            base_dim_1: Fraction(3, 2),
-            base_dim_1_alt: Fraction(1, 2),
-        },
+    assert (
+        DerivedUnit(
+            symbol=None,
+            unit_exponents={base_dim_1: Fraction(3, 2)},
+        ) * DerivedUnit(
+           symbol=None,
+           unit_exponents={base_dim_1_alt: Fraction(1, 2)},
+        )
     ).dimensions() == Dimensions({dim_1: 2})
 
-    assert DerivedUnit(
-        symbol=None,
-        unit_exponents={
-            base_dim_1: Fraction(3, 2),
-            base_dim_1_alt: Fraction(-3, 2),
-        },
+    assert (
+        DerivedUnit(
+            symbol=None,
+            unit_exponents={base_dim_1: Fraction(3, 2)},
+        ) * DerivedUnit(
+           symbol=None,
+           unit_exponents={base_dim_1_alt: Fraction(-3, 2)}
+       )
     ).dimensions() == Dimensions({})
 
 

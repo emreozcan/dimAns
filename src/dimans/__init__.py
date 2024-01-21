@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+import dataclasses
 from collections.abc import Mapping, Sequence
 from fractions import Fraction
 from functools import total_ordering
 from numbers import Rational, Real, Number
 from typing import Any, Self
-
-import attrs
 
 from .base_classes import Unit, Dimensional
 from .dimension import Dimensions, Dimension
@@ -22,7 +21,7 @@ __version__ = "0.0.4"
 
 
 @total_ordering
-@attrs.define(slots=True, frozen=True, repr=False, eq=False)
+@dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class Quantity(Dimensional):
     value: Real
     unit: DerivedUnit
@@ -244,10 +243,7 @@ class Quantity(Dimensional):
         )
 
 
-@total_ordering
-@attrs.define(
-    slots=True, frozen=True, repr=False, eq=False, hash=True
-)
+@dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class DerivedUnit(Unit):
     """Represents a product of one or more base units."""
     symbol: str | None
@@ -420,10 +416,7 @@ class DerivedUnit(Unit):
         )
 
 
-@total_ordering
-@attrs.define(
-    slots=True, frozen=True, repr=False, eq=False, hash=True
-)
+@dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class BaseUnit(Unit):
     """A unit of measurement which only has one dimension of power 1.
 

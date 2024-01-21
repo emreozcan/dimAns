@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from fractions import Fraction
+from functools import total_ordering
 from typing import Self, TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -44,10 +45,8 @@ class Dimensional(ABC):
     # endregion
 
 
+@total_ordering
 class Unit(Dimensional, ABC):
-    symbol: str | None
-    factor: Fraction | float
-
     def conversion_parameters_to(self, other: Unit, /) \
             -> tuple[Fraction | float, Fraction | float]:
         """Get the conversion parameters from this unit to another unit.
@@ -121,6 +120,10 @@ class Unit(Dimensional, ABC):
         return self.si_factor() > other.si_factor()
 
     # endregion
+
+    def __hash__(self):
+        dim = self.dimensions()
+        return hash((self.si_factor(), len(dim), sum(dim.values())))
 
     @abstractmethod
     def __add__(self, other) -> Unit:

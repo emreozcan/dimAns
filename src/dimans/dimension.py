@@ -1,14 +1,13 @@
+import dataclasses
 from collections.abc import MutableMapping, Mapping
 from fractions import Fraction
 from numbers import Number
-from typing import overload, Self, TYPE_CHECKING
-
-import attrs
+from typing import overload, Self
 
 from .base_classes import Dimensional
 
 
-@attrs.define(slots=True, frozen=True, repr=False)
+@dataclasses.dataclass(slots=True, frozen=True)
 class Dimension:
     name: str
     symbol: str

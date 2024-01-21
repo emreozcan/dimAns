@@ -1,7 +1,6 @@
+import dataclasses
 from collections.abc import Sequence
 from fractions import Fraction
-
-import attrs
 
 from ..base_classes import Unit
 from .. import BaseUnit
@@ -16,7 +15,7 @@ __all__ = [
 ]
 
 
-@attrs.define()
+@dataclasses.dataclass(frozen=True)
 class MetricPrefix:
     name: str
     symbol: str
