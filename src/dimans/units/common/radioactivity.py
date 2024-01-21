@@ -8,7 +8,7 @@ from ..si_derived.becquerel import (
     megabecquerel as _megabecquerel
 )
 
-curie = (37 * _gigabecquerel).as_derived_unit()
+curie = (37 * _gigabecquerel).as_derived_unit("Ci")
 rutherford = _megabecquerel.as_derived_unit("Rd")
 rontgen = (_Fraction(258, 10**6) * _coulomb / _kilogram).as_derived_unit("R")
 rad = (100 * _erg / _gram).as_derived_unit("rad")
