@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Mapping, Sequence
+from decimal import Decimal
 from fractions import Fraction
 from functools import total_ordering
-from numbers import Rational, Real, Number
+from numbers import Real, Number
 from typing import Any, Self
 
 from .base_classes import Unit, Dimensional
@@ -17,13 +18,13 @@ __all__ = [
     "BaseUnit",
 ]
 
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 
 
 @total_ordering
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class Quantity(Dimensional):
-    value: Real
+    value: Real | Decimal
     unit: DerivedUnit
 
     def __str__(self):
@@ -38,13 +39,9 @@ class Quantity(Dimensional):
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, float):
-            if not isinstance(power, Rational):
-                return NotImplemented
+        if not isinstance(power, (float, Decimal)):
             power = Fraction(power)
-        if not isinstance(self.value, float):
-            if not isinstance(self.value, Rational):
-                return NotImplemented
+        if isinstance(self.value, int):
             value = Fraction(self.value)
         else:
             value = self.value
@@ -58,7 +55,7 @@ class Quantity(Dimensional):
             return Quantity(self.value * other.value, new_unit)
         if isinstance(other, Unit):
             return self * other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(self.value * other, self.unit)
         return NotImplemented
 
@@ -97,7 +94,7 @@ class Quantity(Dimensional):
             return self * other.multiplicative_inverse()
         if isinstance(other, Unit):
             return self / other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(self.value / other, self.unit)
         return NotImplemented
 
@@ -106,7 +103,7 @@ class Quantity(Dimensional):
             return self.multiplicative_inverse() * other
         if isinstance(other, Unit):
             return self.multiplicative_inverse() * other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(
                 other / self.value,
                 self.unit.multiplicative_inverse()
@@ -131,7 +128,7 @@ class Quantity(Dimensional):
             return Quantity(self.value // other.value, new_unit)
         if isinstance(other, Unit):
             return self // other.as_quantity()
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(self.value // other, self.unit)
         return NotImplemented
 
@@ -143,7 +140,7 @@ class Quantity(Dimensional):
             return Quantity(other.value // self.value, new_unit)
         if isinstance(other, Unit):
             return other.as_quantity() // self
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(
                 other // self.value,
                 self.unit.multiplicative_inverse()
@@ -292,9 +289,7 @@ class DerivedUnit(Unit):
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, float):
-            if not isinstance(power, Rational):
-                return NotImplemented
+        if not isinstance(power, (float, Decimal)):
             power = Fraction(power)
         return DerivedUnit(
             None,
@@ -333,7 +328,7 @@ class DerivedUnit(Unit):
                 self.factor * other.factor
             )
 
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(other, self)
         return NotImplemented
 
@@ -448,9 +443,7 @@ class BaseUnit(Unit):
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, float):
-            if not isinstance(power, Rational):
-                return NotImplemented
+        if not isinstance(power, (float, Decimal)):
             power = Fraction(power)
         return DerivedUnit(None, {self: power})
 
@@ -463,7 +456,7 @@ class BaseUnit(Unit):
                 return self ** 2
             return self.as_derived_unit() * other.as_derived_unit()
 
-        if isinstance(other, Real):
+        if isinstance(other, (Real, Decimal)):
             return Quantity(other, self.as_derived_unit())
         return NotImplemented
 
