@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Mapping, Sequence
-from decimal import Decimal
 from fractions import Fraction
 from functools import total_ordering
 from numbers import Real, Number
@@ -21,25 +20,10 @@ __all__ = [
 __version__ = "0.0.10"
 
 
-def mul(
-    a: int | float | Decimal | Fraction,
-    b: int | float | Decimal | Fraction, /
-) -> int | float | Decimal | Fraction:
-    if isinstance(a, Decimal):
-        if isinstance(b, Decimal):
-            return a * b
-        return a * Decimal(b)
-    if isinstance(b, Decimal):
-        if isinstance(a, Decimal):
-            return a * b
-        return Decimal(a) * b
-    return a * b
-
-
 @total_ordering
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class Quantity(Dimensional):
-    value: Real | Decimal
+    value: Real
     unit: DerivedUnit
 
     def __str__(self):
@@ -53,7 +37,7 @@ class Quantity(Dimensional):
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, (float, Decimal)):
+        if not isinstance(power, float):
             power = Fraction(power)
         if isinstance(self.value, int):
             value = Fraction(self.value)
@@ -65,12 +49,12 @@ class Quantity(Dimensional):
         if isinstance(other, Quantity):
             new_unit: DerivedUnit = self.unit * other.unit
             if not new_unit.dimensions():
-                return mul(self.value, other.value) * new_unit.si_factor()
-            return Quantity(mul(self.value, other.value), new_unit)
+                return self.value * other.value * new_unit.si_factor()
+            return Quantity(self.value * other.value, new_unit)
         if isinstance(other, Unit):
             return self * other.as_quantity()
-        if isinstance(other, (Real, Decimal)):
-            return Quantity(mul(self.value, other), self.unit)
+        if isinstance(other, Real):
+            return Quantity(self.value * other, self.unit)
         return NotImplemented
 
     __rmul__ = __mul__
@@ -108,7 +92,7 @@ class Quantity(Dimensional):
             return self * other.multiplicative_inverse()
         if isinstance(other, Unit):
             return self / other.as_quantity()
-        if isinstance(other, (Real, Decimal)):
+        if isinstance(other, Real):
             return Quantity(self.value / other, self.unit)
         return NotImplemented
 
@@ -117,7 +101,7 @@ class Quantity(Dimensional):
             return self.multiplicative_inverse() * other
         if isinstance(other, Unit):
             return self.multiplicative_inverse() * other.as_quantity()
-        if isinstance(other, (Real, Decimal)):
+        if isinstance(other, Real):
             return Quantity(
                 other / self.value,
                 self.unit.multiplicative_inverse()
@@ -142,7 +126,7 @@ class Quantity(Dimensional):
             return Quantity(self.value // other.value, new_unit)
         if isinstance(other, Unit):
             return self // other.as_quantity()
-        if isinstance(other, (Real, Decimal)):
+        if isinstance(other, Real):
             return Quantity(self.value // other, self.unit)
         return NotImplemented
 
@@ -154,7 +138,7 @@ class Quantity(Dimensional):
             return Quantity(other.value // self.value, new_unit)
         if isinstance(other, Unit):
             return other.as_quantity() // self
-        if isinstance(other, (Real, Decimal)):
+        if isinstance(other, Real):
             return Quantity(
                 other // self.value,
                 self.unit.multiplicative_inverse()
@@ -220,7 +204,7 @@ class Quantity(Dimensional):
         factor, offset = self.unit.conversion_parameters_to(other)
         if not isinstance(other, DerivedUnit):
             other = other.as_derived_unit()
-        return Quantity(mul(self.value, factor) + offset, other)
+        return Quantity(self.value * factor + offset, other)
 
     def convert_to_terms(
         self,
@@ -322,7 +306,7 @@ class DerivedUnit(Unit):
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, (float, Decimal)):
+        if not isinstance(power, float):
             power = Fraction(power)
         return DerivedUnit(
             None,
@@ -361,7 +345,7 @@ class DerivedUnit(Unit):
                 self.factor * other.factor
             )
 
-        if isinstance(other, (Real, Decimal)):
+        if isinstance(other, Real):
             return Quantity(other, self)
         return NotImplemented
 
@@ -476,7 +460,7 @@ class BaseUnit(Unit):
 
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
-        if not isinstance(power, (float, Decimal)):
+        if not isinstance(power, float):
             power = Fraction(power)
         return DerivedUnit(None, {self: power})
 
@@ -489,7 +473,7 @@ class BaseUnit(Unit):
                 return self ** 2
             return self.as_derived_unit() * other.as_derived_unit()
 
-        if isinstance(other, (Real, Decimal)):
+        if isinstance(other, Real):
             return Quantity(other, self.as_derived_unit())
         return NotImplemented
 
