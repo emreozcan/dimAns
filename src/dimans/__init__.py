@@ -253,6 +253,25 @@ class Quantity(Dimensional):
             self.unit.factor * self.value
         )
 
+    def as_constant(self, symbol: str) -> Constant:
+        return Constant(
+            value=self.value,
+            unit=self.unit,
+            symbol=symbol,
+        )
+
+
+@dataclasses.dataclass(slots=True, frozen=True, eq=False)
+class Constant(Quantity):
+    symbol: str
+
+    def __str__(self):
+        return self.symbol
+
+    def __repr__(self):
+        return (f"<{self.__class__.__name__} {self} "
+                f"= {Quantity.__str__(self)}>")
+
 
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class DerivedUnit(Unit):
