@@ -35,6 +35,16 @@ class Quantity(Dimensional):
     def __repr__(self):
         return f"<{self.__class__.__name__} {self}>"
 
+    def __hash__(self):
+        dim = self.dimensions()
+        return hash(
+            (
+                self.underlying_value(),
+                len(dim),
+                sum(dim.values())
+            )
+        )
+
     # region Arithmetic operation handlers
     def __pow__(self, power: int | Fraction | float, modulo=None):
         if not isinstance(power, float):
@@ -166,8 +176,7 @@ class Quantity(Dimensional):
         if isinstance(other, Quantity):
             if self.dimensions() != other.dimensions():
                 return False
-            if (self.value * self.unit.si_factor()
-                    != other.value * other.unit.si_factor()):
+            if self.underlying_value() != other.underlying_value():
                 return False
             return True
         return NotImplemented
@@ -176,10 +185,12 @@ class Quantity(Dimensional):
         if isinstance(other, Quantity):
             if self.dimensions() != other.dimensions():
                 raise ValueError(f"units must have the same dimensions")
-            return (self.value * self.unit.si_factor()
-                    > other.value * other.unit.si_factor())
+            return self.underlying_value() > other.underlying_value()
         return NotImplemented
     # endregion
+
+    def underlying_value(self):
+        return self.value * self.unit.si_factor() + self.unit.si_offset()
 
     def dimensions(self):
         return self.unit.dimensions()
