@@ -226,15 +226,11 @@ class Quantity(Dimensional):
         return quantities
 
     def as_derived_unit(self, symbol: str = None) -> DerivedUnit:
-        if self.unit.si_offset() != 0:
-            raise ValueError(
-                "converting a quantity with an offset unit to a derived unit "
-                "doesn't make sense"
-            )
         return DerivedUnit(
             symbol,
             self.unit.unit_exponents,
-            self.unit.factor * self.value
+            self.unit.factor * self.value,
+            self.unit.si_offset(),
         )
 
     def as_constant(self, symbol: str) -> Constant:
