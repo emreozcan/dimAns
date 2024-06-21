@@ -45,8 +45,10 @@ class Quantity(Dimensional):
         )
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: int | float, modulo=None) -> Self:
-        if isinstance(power, (int, float)):
+    def __pow__(self, power: Fraction | int, modulo=None) -> Self:
+        if isinstance(power, int):
+            power = Fraction(power)
+        if isinstance(power, Fraction):
             return Quantity(self.value ** power, self.unit ** power)
         return NotImplemented
 
