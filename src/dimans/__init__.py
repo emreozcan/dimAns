@@ -267,7 +267,7 @@ class Constant(Quantity):
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class DerivedUnit(Unit):
     """Represents a product of one or more base units."""
-    symbol: str | None
+    _symbol: str | None
     unit_exponents: Mapping[BaseUnit, Fraction]
     factor: int | float = 1
     offset: int | float = 0
@@ -289,8 +289,8 @@ class DerivedUnit(Unit):
         )
 
     def __str__(self):
-        if self.symbol:
-            return self.symbol
+        if self._symbol:
+            return self._symbol
         if self.factor == 1:
             if self.offset != 0:
                 return f"{self._str_with_multiplicands()} + {self.offset}"
@@ -307,8 +307,8 @@ class DerivedUnit(Unit):
         if self.offset != 0:
             _expr += f" + {self.offset}"
 
-        if self.symbol:
-            return f"<{self.__class__.__name__} {self.symbol} = {_expr}>"
+        if self._symbol:
+            return f"<{self.__class__.__name__} {self._symbol} = {_expr}>"
         return f"<{self.__class__.__name__} {_expr}>"
 
     # region Arithmetic operation handlers
@@ -363,7 +363,7 @@ class DerivedUnit(Unit):
     def __add__(self, other: int | float, /):
         if isinstance(other, (int, float)):
             return DerivedUnit(
-                symbol=None,
+                _symbol=None,
                 unit_exponents=self.unit_exponents,
                 factor=self.factor,
                 offset=self.offset + other
@@ -413,6 +413,10 @@ class DerivedUnit(Unit):
     def si_offset(self) -> float:
         return self.offset
 
+    @property
+    def symbol(self) -> str:
+        return self._symbol
+
     def as_quantity(self) -> Quantity:
         return Quantity(1 if not self.offset else 0, self)
 
@@ -436,6 +440,14 @@ class DerivedUnit(Unit):
             self.offset,
         )
 
+    def with_symbol(self, symbol: str) -> DerivedUnit:
+        return DerivedUnit(
+            symbol,
+            self.unit_exponents,
+            self.factor,
+            self.offset,
+        )
+
 
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class BaseUnit(Unit):
@@ -448,7 +460,7 @@ class BaseUnit(Unit):
     metres per second is not a base unit.
     """
 
-    symbol: str
+    _symbol: str
     """The symbol of the unit.
 
     This value is used to generate human-readable representations of
@@ -462,7 +474,7 @@ class BaseUnit(Unit):
     """
 
     def __str__(self):
-        return self.symbol
+        return self._symbol
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self}>"
@@ -492,7 +504,7 @@ class BaseUnit(Unit):
     def __add__(self, other: float | int, /):
         if isinstance(other, (float, int)):
             return DerivedUnit(
-                symbol=None,
+                _symbol=None,
                 unit_exponents={self: Fraction(1)},
                 factor=1,
                 offset=other
@@ -544,3 +556,10 @@ class BaseUnit(Unit):
 
     def si_offset(self) -> float | int:
         return 0
+
+    @property
+    def symbol(self) -> str:
+        return self._symbol
+
+    def with_symbol(self, symbol: str) -> Unit:
+        return BaseUnit(symbol, self.dimension, self.factor)

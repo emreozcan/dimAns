@@ -89,6 +89,15 @@ class Unit(Dimensional, ABC):
     def si_offset(self) -> float | int:
         pass
 
+    @property
+    @abstractmethod
+    def symbol(self) -> str | None:
+        pass
+
+    @abstractmethod
+    def with_symbol(self, symbol: str) -> Unit:
+        pass
+
     @abstractmethod
     def multiplicative_inverse(self) -> DerivedUnit:
         pass
