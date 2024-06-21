@@ -1,12 +1,10 @@
-from fractions import Fraction as _Fraction
-
 from ..metric.litre import microlitre as _microlitre, litre as _litre
 from ..imperial.length import inch as _inch
 from ... import DerivedUnit as _DerivedUnit
 
 us_minim = _DerivedUnit.using(
     _microlitre, "min",
-    _Fraction(61_611_519_921_875, 10_000_000_000_00)
+    (61_611_519_921_875/10_000_000_000_00)
 )
 
 us_fluid_dram = (60 * us_minim).as_derived_unit("fl dr")
@@ -21,14 +19,14 @@ us_quart_liquid = (2 * us_pint_liquid).as_derived_unit("qt")
 us_pottle_liquid = (2 * us_quart_liquid).as_derived_unit("pot")
 us_gallon_liquid = (4 * us_quart_liquid).as_derived_unit("gal")
 us_barrel_liquid = (
-    _Fraction(315, 10) * us_gallon_liquid
+    (31.5 * us_gallon_liquid)
 ).as_derived_unit("bbl")
 oil_barrel = (42 * us_gallon_liquid).as_derived_unit("bbl")
 hogshead = (63 * us_gallon_liquid).as_derived_unit("hogshead")
 
 us_pint_dry = _DerivedUnit.using(
     _litre, "pt",
-    _Fraction(5506104713575, 10000000000000)
+    (5506104713575/10000000000000)
 )
 us_quart_dry = (2 * us_pint_dry).as_derived_unit("qt")
 us_gallon_dry = (4 * us_quart_dry).as_derived_unit("gal")

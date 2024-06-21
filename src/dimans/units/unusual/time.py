@@ -1,5 +1,3 @@
-from fractions import Fraction as _Fraction
-
 from ...constants import speed_of_light_in_vacuum as _speed_of_light_in_vacuum
 
 from ..imperial import mile as _mile, foot as _foot
@@ -13,8 +11,8 @@ light_metre = (
     _metre / _speed_of_light_in_vacuum).as_derived_unit("light-metre")
 light_kilometre = (
     _kilometre / _speed_of_light_in_vacuum).as_derived_unit("light-kilometre")
-microfortnight = (_Fraction(756, 625) * _second).as_derived_unit("μfn")
+microfortnight = ((756/625) * _second).as_derived_unit("μfn")
 sidereal_day = (
-    _Fraction(86164_0905, 1_0000) * _second).as_derived_unit("Sidereal day")
+    (86164.0905) * _second).as_derived_unit("Sidereal day")
 sol = (88_775 * _second).as_derived_unit("sol")
-dog_year = (_Fraction(1, 7) * _year).as_derived_unit("dog year")
+dog_year = ((1/7) * _year).as_derived_unit("dog year")

@@ -1,5 +1,3 @@
-from fractions import Fraction as _Fraction
-
 from ..si_derived.watt import kilowatt as _kilowatt
 from ..common.time import hour as _hour
 from ..metric.calorie import gigacalorie as _gigacalorie
@@ -8,7 +6,7 @@ from ..common.energy import british_thermal_unit as _british_termal_unit
 from ..si_derived.joule import joule as _joule
 
 gasoline_gallon_equivalent = (
-    _Fraction(337, 10) * _kilowatt * _hour
+    33.7 * _kilowatt * _hour
 ).as_derived_unit("gasoline gallon equivalent")
 
 tons_of_tnt_equivalent = _gigacalorie.as_derived_unit("ton of TNT equivalent")

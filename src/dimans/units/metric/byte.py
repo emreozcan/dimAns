@@ -1,5 +1,3 @@
-from fractions import Fraction as _Fraction
-
 from ..metric_utils import (
     make_metric_units as _make_metric_units,
     make_binary_metric_units as _make_binary_metric_units,
@@ -9,7 +7,7 @@ from ...dimension import dimensions as _dimensions
 
 _data_dimension = _dimensions.get_or_register("data", "D")
 
-byte = _BaseUnit(symbol="B", factor=_Fraction(8), dimension=_data_dimension)
+byte = _BaseUnit(_symbol="B", factor=8, dimension=_data_dimension)
 
 (
     quettabyte,

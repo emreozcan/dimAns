@@ -1,13 +1,11 @@
-from fractions import Fraction as _Fraction
-
 from ..si_derived.joule import (joule as _joule)
 from ..metric_utils import make_metric_units as _make_metric_units
 
 
 electron_volt = (
-    _Fraction(
-        1_602_176_634,
-        1_000_000_000 * 10 ** 19
+    (
+        1.602_176_634
+        / (10 ** 19)
     ) * _joule
 ).as_derived_unit("eV")
 

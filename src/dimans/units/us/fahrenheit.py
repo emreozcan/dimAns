@@ -10,6 +10,6 @@ __all__ = [
 fahrenheit = DerivedUnit(
     "°F",
     {kelvin: Fraction(1)},
-    Fraction(5, 9),
-    Fraction(45967, 100)
+    5/9,
+    459.67
 )

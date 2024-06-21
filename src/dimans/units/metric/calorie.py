@@ -1,9 +1,7 @@
-from fractions import Fraction as _Fraction
-
 from ..si_derived.joule import joule as _joule
 from ..metric_utils import make_metric_units as _make_metric_units
 
-calorie = (_Fraction(4184, 1000) * _joule).as_derived_unit("cal")
+calorie = (4.184 * _joule).as_derived_unit("cal")
 
 (
     quettacalorie,

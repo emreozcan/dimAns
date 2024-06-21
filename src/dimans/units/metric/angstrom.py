@@ -1,9 +1,7 @@
-from fractions import Fraction as _Fraction
-
 from ..si_base.metre import nanometre as _nanometre
 from ..metric_utils import make_metric_units as _make_metric_units
 
-angstrom = (_Fraction(1, 10) * _nanometre).as_derived_unit("Å")
+angstrom = (0.1 * _nanometre).as_derived_unit("Å")
 
 (
     quettaangstrom,

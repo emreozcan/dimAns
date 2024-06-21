@@ -1,5 +1,3 @@
-from fractions import Fraction as _Fraction
-
 from ..si_derived.sievert import (
     nanosievert as _nanosievert,
     millisievert as _millisievert
@@ -21,14 +19,12 @@ amazon_river = (216_000 * _metre**3 / _second).as_derived_unit("Amazon River")
 sverdrup = (1_000_000 * _metre**3 / _second).as_derived_unit("Sv")
 langley = (_calorie / _centimetre**2).as_derived_unit("Ly")
 stokes = (_centimetre**2 / _second).as_derived_unit("St")
-milli_earth_rate_unit = (
-    _Fraction(15, 100) * _degree / _hour).as_derived_unit("MERU")
-jansky = (
-    _Fraction(1, 10**26) * _watt / _metre ** 2 / _hertz).as_derived_unit("Jy")
+milli_earth_rate_unit = (.15 * _degree / _hour).as_derived_unit("MERU")
+jansky = (10**-26 * _watt / _metre ** 2 / _hertz).as_derived_unit("Jy")
 metre_of_water_equivalent = (
     100 * _hectogram / _centimetre**2).as_derived_unit("m.w.e.")
 banana_equivalent_dose = (
     78 * _nanosievert).as_derived_unit("banana equivalent dose")
 flight_time_equivalent_dose = (
-    _Fraction(4, 1000) * _millisievert / _hour
+    (.004 * _millisievert / _hour)
 ).as_derived_unit("flight-time equivalent dose")

@@ -10,6 +10,6 @@ __all__ = [
 celsius = DerivedUnit(
     "°C",
     {kelvin: Fraction(1)},
-    Fraction(1),
-    Fraction(27315, 100)
+    1,
+    273.15
 )

@@ -48,7 +48,6 @@ metric_prefixes = [
     MetricPrefix("quecto", "q", Fraction(1, 10 ** 30)),
 ]
 
-
 binary_metric_prefixes = [
     MetricPrefix("kibi", "Ki", Fraction(2 ** 10)),
     MetricPrefix("mebi", "Mi", Fraction(2 ** 20)),
@@ -64,15 +63,14 @@ binary_metric_prefixes = [
 def map_to_units(unit: Unit, prefix_list: Sequence[MetricPrefix]) -> list[Unit]:
     if not isinstance(unit, BaseUnit):
         return [
-            (prefix.factor * unit).as_derived_unit(prefix.symbol + unit.symbol)
+            (unit * float(prefix.factor))
+            .as_derived_unit(prefix.symbol + unit.symbol)
             for prefix in prefix_list
         ]
-    if unit.dimension.name == "data":
-        pass
     return [
         BaseUnit(
-            symbol=prefix.symbol + unit.symbol,
-            factor=prefix.factor * unit.factor,
+            _symbol=prefix.symbol + unit.symbol,
+            factor=float(prefix.factor * unit.factor),
             dimension=unit.dimension,
         )
         for prefix in prefix_list
