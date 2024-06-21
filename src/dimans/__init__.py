@@ -70,7 +70,7 @@ class Quantity(Dimensional):
     def __add__(self, other: Quantity | Literal[0], /) -> Quantity:
         if isinstance(other, Quantity):
             if self.unit != other.unit:
-                return self + other.convert_to(self.unit)
+                return self + other.to(self.unit)
             return Quantity(self.value + other.value, self.unit)
         if other == 0:  # This allows using sum() on a list of quantities.
             return self
@@ -120,7 +120,7 @@ class Quantity(Dimensional):
             -> tuple[int, Quantity] | NotImplemented:
         if isinstance(other, Quantity):
             if self.unit != other.unit:
-                return divmod(self.convert_to(other.unit), other)
+                return divmod(self.to(other.unit), other)
             div_, mod_ = divmod(self.value, other.value)
             return div_, Quantity(mod_, self.unit)
         if isinstance(other, Unit):
@@ -159,7 +159,7 @@ class Quantity(Dimensional):
     def __mod__(self, other: Self | Unit, /) -> Self:
         if isinstance(other, Quantity):
             if self.unit != other.unit:
-                return self.convert_to(other.unit) % other
+                return self.to(other.unit) % other
             return Quantity(self.value % other.value, self.unit)
         if isinstance(other, Unit):
             return self % other.as_quantity()
@@ -202,7 +202,7 @@ class Quantity(Dimensional):
     def additive_inverse(self):
         return Quantity(-self.value, self.unit)
 
-    def convert_to(self, other: Unit | Quantity, /):
+    def to(self, other: Unit | Quantity, /):
         """Convert this quantity to another unit.
 
         This method returns a new Quantity
@@ -218,7 +218,7 @@ class Quantity(Dimensional):
             other = other.as_derived_unit()
         return Quantity(self.value * factor + offset, other)
 
-    def convert_to_terms(
+    def to_terms(
         self,
         units: Sequence[Unit],
         sort=False

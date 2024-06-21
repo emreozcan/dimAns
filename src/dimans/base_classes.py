@@ -63,16 +63,6 @@ class Unit(Dimensional, ABC):
         factor = from_factor / to_factor
         return factor, (from_offset * from_factor / to_factor - to_offset)
 
-    def conversion_parameters_from(self, other: Unit, /) -> tuple[float, float]:
-        """Get the conversion parameters from another unit to this unit.
-
-        A measurement in terms of the other unit must be multiplied with
-        the first element of the returned tuple,
-        and the second element must be added
-        to get a measurement in this unit.
-        """
-        return other.conversion_parameters_to(self)
-
     @abstractmethod
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
         pass
