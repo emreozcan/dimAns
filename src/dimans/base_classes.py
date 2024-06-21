@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from fractions import Fraction
 from functools import total_ordering
-from typing import Self, TYPE_CHECKING, Any
+from typing import Self, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .dimension import Dimensions
     from . import DerivedUnit, Quantity
+    from fractions import Fraction
 
 
 class Dimensional(ABC):
@@ -38,17 +38,12 @@ class Dimensional(ABC):
     @abstractmethod
     def __pow__(self, power, modulo=None):
         pass
-
-    # region Square root by pow
-    def sqrt(self) -> Self:
-        return self ** Fraction(1, 2)
     # endregion
 
 
 @total_ordering
 class Unit(Dimensional, ABC):
-    def conversion_parameters_to(self, other: Unit, /) \
-            -> tuple[Fraction | float, Fraction | float]:
+    def conversion_parameters_to(self, other: Unit, /) -> tuple[float, float]:
         """Get the conversion parameters from this unit to another unit.
 
         A measurement in terms of this unit must be multiplied with the first
@@ -68,8 +63,7 @@ class Unit(Dimensional, ABC):
         factor = from_factor / to_factor
         return factor, (from_offset * from_factor / to_factor - to_offset)
 
-    def conversion_parameters_from(self, other: Unit, /) \
-            -> tuple[Fraction | float, Fraction | float]:
+    def conversion_parameters_from(self, other: Unit, /) -> tuple[float, float]:
         """Get the conversion parameters from another unit to this unit.
 
         A measurement in terms of the other unit must be multiplied with
@@ -88,11 +82,11 @@ class Unit(Dimensional, ABC):
         pass
 
     @abstractmethod
-    def si_factor(self) -> Fraction | float:
+    def si_factor(self) -> float | int:
         pass
 
     @abstractmethod
-    def si_offset(self) -> Fraction | float:
+    def si_offset(self) -> float | int:
         pass
 
     @abstractmethod
@@ -100,7 +94,7 @@ class Unit(Dimensional, ABC):
         pass
 
     # region Comparison handlers
-    def __eq__(self, other: Any, /):
+    def __eq__(self, other: Unit, /) -> bool:
         if not isinstance(other, Unit):
             return NotImplemented
 
@@ -110,7 +104,7 @@ class Unit(Dimensional, ABC):
             return False
         return True
 
-    def __gt__(self, other: Any, /):
+    def __gt__(self, other: Unit, /) -> bool:
         if not isinstance(other, Unit):
             return NotImplemented
 
@@ -118,34 +112,33 @@ class Unit(Dimensional, ABC):
             raise ValueError(f"units must have the same dimensions")
 
         return self.si_factor() > other.si_factor()
-
     # endregion
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         dim = self.dimensions()
         return hash((self.si_factor(), len(dim), sum(dim.values())))
 
     @abstractmethod
-    def __add__(self, other) -> Unit:
+    def __add__(self, other: int | float) -> Unit:
         pass
 
-    def __radd__(self, other):
+    def __radd__(self, other: int | float) -> Unit:
         return self.__add__(other)
 
-    def __sub__(self, other):
+    def __sub__(self, other: int | float) -> Unit:
         return self.__add__(-other)
 
     # These arithmetic operations are redefined
     # from Dimensional for stricter typing.
     @abstractmethod
-    def __mul__(self, other) -> Unit | Quantity:
+    def __mul__(self, other: Unit | float | int) -> Unit | Quantity:
         pass
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Unit | float | int) -> Unit | Quantity:
         return self.__mul__(other)
 
     @abstractmethod
-    def __pow__(self, power: int | Fraction | float, modulo=None) -> Unit:
+    def __pow__(self, power: Fraction, modulo=None) -> DerivedUnit:
         pass
 
 

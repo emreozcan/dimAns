@@ -1,7 +1,6 @@
 import dataclasses
 from collections.abc import MutableMapping, Mapping
 from fractions import Fraction
-from numbers import Number
 from typing import overload, Self
 
 from .base_classes import Dimensional
@@ -100,10 +99,10 @@ dimensions.register("thermodynamic temperature", "Θ")
 dimensions.register("amount of substance", "N")
 
 
-class Dimensions(Mapping[Dimension, Fraction | float], Dimensional):
-    _map: dict[Dimension, Fraction | float]
+class Dimensions(Mapping[Dimension, Fraction], Dimensional):
+    _map: dict[Dimension, Fraction]
 
-    def __init__(self, mapping: Mapping[Dimension, Fraction | float] = None):
+    def __init__(self, mapping: Mapping[Dimension, Fraction] = None):
         if mapping is not None:
             self._map = dict(mapping)
         else:
@@ -131,13 +130,13 @@ class Dimensions(Mapping[Dimension, Fraction | float], Dimensional):
         return Dimensions({d: -p for d, p in self._map.items()})
 
     def __getitem__(self, __key):
-        return self._map.__getitem__(__key)
+        return self._map[__key]
 
     def __len__(self):
-        return self._map.__len__()
+        return len(self._map)
 
     def __iter__(self):
-        return self._map.__iter__()
+        return iter(self._map)
 
     # region Arithmetic operations
     def __mul__(self, other):
@@ -153,42 +152,20 @@ class Dimensions(Mapping[Dimension, Fraction | float], Dimensional):
 
     __rmul__ = __mul__
 
-    def __truediv__(self, other):
-        if other == 1:
-            return self
+    def __truediv__(self, other: Self) -> Self:
         if isinstance(other, Dimensions):
             return self * other.multiplicative_inverse()
-        elif isinstance(other, Number):
-            return self
-        else:
-            return NotImplemented
+        return NotImplemented
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Self) -> Self:
         if isinstance(other, Dimensions):
             return other * self.multiplicative_inverse()
-        elif isinstance(other, Number):
-            return self.multiplicative_inverse()
-        else:
-            return NotImplemented
+        return NotImplemented
 
-    def __pow__(self, power, modulo=None):
-        if isinstance(power, (float, Fraction)):
+    def __pow__(self, power: Fraction, modulo=None) -> Self:
+        if isinstance(power, Fraction):
             return Dimensions({d: p * power for d, p in self._map.items()})
-        elif isinstance(power, int):
-            power = Fraction(power)
-            return Dimensions({d: p * power for d, p in self._map.items()})
-        else:
-            return NotImplemented
-
-    def __neg__(self):
-        return self
-
-    def __pos__(self):
-        return self
-
-    def __abs__(self):
-        return self
-
+        return NotImplemented
     # endregion
 
 
