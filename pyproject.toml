@@ -16,7 +16,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 keywords = ["units", "calculation", "calculator", "constants"]
-requires-python = "~=3.7"
+requires-python = "~=3.11"
 license = { file = "LICENSE" }
 dynamic = ["version",]
 
