@@ -32,9 +32,7 @@ build-backend = "flit_core.buildapi"
 include = ["src/"]
 
 [tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib",
-]
+addopts = "--import-mode=importlib --cov=dimans --cov-report html --cov-report xml"
 pythonpath = "src"
 testpaths="tests"
 
