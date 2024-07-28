@@ -26,6 +26,7 @@ jobs:
                 run: |
                     pipenv install -d
                     pipenv run pip install flake8
+                    pipenv graph
             -   name: Lint with flake8
                 run: |
                     # stop the build if there are Python syntax errors or undefined names
@@ -38,3 +39,5 @@ jobs:
                 run: pipenv run pytest
             -   name: Upload coverage report to Codacy
                 run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml
+                env:
+                    CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
