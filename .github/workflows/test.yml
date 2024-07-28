@@ -20,10 +20,9 @@ jobs:
                 with:
                     python-version: ${{ matrix.python-version }}
                     cache: "pipenv"
-            -   name: Install pipenv
-                run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
             -   name: Install dependencies
                 run: |
+                    pip install pipenv
                     pipenv install -d
                     pipenv run pip install flake8
                     pipenv graph
