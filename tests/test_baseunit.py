@@ -10,8 +10,8 @@ dim_1 = Dimension("dim_1", "dim_1")
 
 
 def test_baseunit_conversion_parameters():
-    one = BaseUnit("1", dim_1, Fraction(1))
-    two = BaseUnit("2", dim_1, Fraction(2))
+    one = BaseUnit("1", dim_1, 1)
+    two = BaseUnit("2", dim_1, 2)
 
     assert one.conversion_parameters_to(two) == (Fraction(1, 2), 0)
     assert two.conversion_parameters_to(one) == (2, 0)
@@ -20,10 +20,10 @@ def test_baseunit_conversion_parameters():
 
 
 def test_baseunit_order():
-    one = BaseUnit("1", dim_1, Fraction(1))
-    two = BaseUnit("2", dim_1, Fraction(2))
+    one = BaseUnit("1", dim_1, 1)
+    two = BaseUnit("2", dim_1, 2)
 
-    another_one = BaseUnit("1", dim_1, Fraction(1))
+    another_one = BaseUnit("1", dim_1, 1)
 
     assert one == another_one
     assert two != another_one
@@ -45,15 +45,15 @@ def test_baseunit_order():
     assert not (one < one)
 
     dim_2 = Dimension("dim_2", "dim_2")
-    unrelated_unit = BaseUnit("unrelated", dim_2, Fraction(1))
+    unrelated_unit = BaseUnit("unrelated", dim_2, 1)
     assert dim_1 != unrelated_unit
 
 
 def test_baseunit_compare_other_dimensions():
-    unit_1 = BaseUnit("1", dim_1, Fraction(1))
+    unit_1 = BaseUnit("1", dim_1, 1)
 
     dim_2 = Dimension("dim_2", "dim_2")
-    unit_2 = BaseUnit("2", dim_2, Fraction(1))
+    unit_2 = BaseUnit("2", dim_2, 1)
 
     assert dim_1 != dim_2
 
@@ -65,7 +65,7 @@ def test_baseunit_compare_other_dimensions():
 
 
 def test_baseunit_dimensions():
-    one = BaseUnit("1", dim_1, Fraction(1))
+    one = BaseUnit("1", dim_1, 1)
     dims = one.dimensions()
 
     assert len(dims) == 1
@@ -73,8 +73,8 @@ def test_baseunit_dimensions():
 
 
 def test_baseunit_conversion_to_derived_unit():
-    one = BaseUnit("1", dim_1, Fraction(1))
-    two = BaseUnit("2", dim_1, Fraction(2))
+    one = BaseUnit("1", dim_1, 1)
+    two = BaseUnit("2", dim_1, 2)
 
     one_du = one.as_derived_unit()
     two_du = two.as_derived_unit()
@@ -99,9 +99,9 @@ def test_baseunit_conversion_to_derived_unit():
 
 
 def test_baseunit_pow():
-    two = BaseUnit("2", dim_1, Fraction(2))
+    two = BaseUnit("2", dim_1, 2)
 
-    four = two ** 2
+    four = two ** Fraction(2)
 
     four_dims = four.dimensions()
     assert len(four_dims) == 1
@@ -122,21 +122,9 @@ def test_baseunit_pow():
         assert two ** 1j
 
 
-def test_baseunit_sqrt():
-    four = BaseUnit("4", dim_1, Fraction(4))
-
-    two = four.sqrt()
-
-    two_dims = two.dimensions()
-    assert len(two_dims) == 1
-    assert two_dims[dim_1] == Fraction(1, 2)
-
-    assert two ** 2 == four
-
-
 def test_baseunit_mul():
-    base_unit = BaseUnit("x", dim_1, Fraction(2))
-    other_base_unit = BaseUnit("y", dim_1, Fraction(3))
+    base_unit = BaseUnit("x", dim_1, 2)
+    other_base_unit = BaseUnit("y", dim_1, 3)
     derived_unit = base_unit.as_derived_unit()
 
     assert type(base_unit * base_unit) is DerivedUnit
@@ -153,12 +141,12 @@ def test_baseunit_mul():
     quantity = other_base_unit.as_quantity()
     assert base_unit.__mul__(quantity) == NotImplemented
 
-    assert base_unit * base_unit == base_unit ** 2
+    assert base_unit * base_unit == base_unit ** Fraction(2)
 
 
 def test_baseunit_div():
-    some_unit = BaseUnit("x", dim_1, Fraction(16))
-    some_other_unit = BaseUnit("y", dim_1, Fraction(4))
+    some_unit = BaseUnit("x", dim_1, 16)
+    some_other_unit = BaseUnit("y", dim_1, 4)
 
     assert some_unit / 1 is some_unit
     assert 1 / some_unit == some_unit.multiplicative_inverse()
@@ -180,7 +168,7 @@ def test_baseunit_div():
 
 
 def test_baseunit_add():
-    some_unit = BaseUnit("x", dim_1, Fraction(1))
+    some_unit = BaseUnit("x", dim_1, 1)
     offset_unit = some_unit + 32
 
     assert type(offset_unit) is DerivedUnit
@@ -202,18 +190,18 @@ def test_baseunit_add():
 
 
 def test_baseunit_using():
-    one = BaseUnit("1", dim_1, Fraction(1))
-    two = BaseUnit("2", dim_1, Fraction(2))
+    one = BaseUnit("1", dim_1, 1)
+    two = BaseUnit("2", dim_1, 2)
 
     assert BaseUnit.using(one, factor=2) == two
 
 
 def test_baseunit_multiplicative_inverse():
-    two = BaseUnit("2", dim_1, Fraction(2))
+    two = BaseUnit("2", dim_1, 2)
 
     one_over_two = two.multiplicative_inverse()
 
-    assert one_over_two == two ** -1
+    assert one_over_two == two ** Fraction(-1)
     assert type(one_over_two) is DerivedUnit
     assert len(one_over_two.unit_exponents) == 1
     assert one_over_two.unit_exponents[two] == -1
@@ -224,7 +212,7 @@ def test_baseunit_multiplicative_inverse():
 
 
 def test_baseunit_as():
-    some_unit = BaseUnit("x", dim_1, Fraction(1))
+    some_unit = BaseUnit("x", dim_1, 1)
 
     derived_unit = some_unit.as_derived_unit()
     assert type(derived_unit) is DerivedUnit
@@ -238,10 +226,10 @@ def test_baseunit_as():
 
 
 def test_baseunit_repr():
-    assert repr(BaseUnit("x", dim_1, Fraction(1))) == "<BaseUnit x>"
-    assert repr(BaseUnit("x", dim_1, Fraction(2))) == "<BaseUnit x>"
+    assert repr(BaseUnit("x", dim_1, 1)) == "<BaseUnit x>"
+    assert repr(BaseUnit("x", dim_1, 2)) == "<BaseUnit x>"
 
 
 def test_baseunit_str():
-    assert str(BaseUnit("x", dim_1, Fraction(1))) == "x"
-    assert str(BaseUnit("x", dim_1, Fraction(2))) == "x"
+    assert str(BaseUnit("x", dim_1, 1)) == "x"
+    assert str(BaseUnit("x", dim_1, 2)) == "x"
