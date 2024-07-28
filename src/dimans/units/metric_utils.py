@@ -69,7 +69,7 @@ def map_to_units(unit: Unit, prefix_list: Sequence[MetricPrefix]) -> list[Unit]:
         ]
     return [
         BaseUnit(
-            _symbol=prefix.symbol + unit.symbol,
+            symbol=prefix.symbol + unit.symbol,
             factor=float(prefix.factor * unit.factor),
             dimension=unit.dimension,
         )

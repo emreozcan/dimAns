@@ -264,14 +264,25 @@ class Constant(Quantity):
         return f"<{self.__class__.__name__} {self} = {Quantity.__str__(self)}>"
 
 
-@dataclasses.dataclass(slots=True, frozen=True, eq=False)
+@dataclasses.dataclass(slots=True, frozen=True, eq=False, init=False)
 class DerivedUnit(Unit):
     """Represents a product of one or more base units."""
-    _symbol: str | None
+    symbol: str | None
     unit_exponents: Mapping[BaseUnit, Fraction]
     factor: int | float = 1
     offset: int | float = 0
 
+    def __init__(
+        self,
+        symbol: str | None,
+        unit_exponents: Mapping[BaseUnit, Fraction],
+        factor: int | float = 1,
+        offset: int | float = 0,
+    ):
+        object.__setattr__(self, "symbol", symbol)
+        object.__setattr__(self, "unit_exponents", unit_exponents)
+        object.__setattr__(self, "factor", factor)
+        object.__setattr__(self, "offset", offset)
 
     @classmethod
     def using(
@@ -289,8 +300,8 @@ class DerivedUnit(Unit):
         )
 
     def __str__(self):
-        if self._symbol:
-            return self._symbol
+        if self.symbol:
+            return self.symbol
         if self.factor == 1:
             if self.offset != 0:
                 return f"{self._str_with_multiplicands()} + {self.offset}"
@@ -307,8 +318,8 @@ class DerivedUnit(Unit):
         if self.offset != 0:
             _expr += f" + {self.offset}"
 
-        if self._symbol:
-            return f"<{self.__class__.__name__} {self._symbol} = {_expr}>"
+        if self.symbol:
+            return f"<{self.__class__.__name__} {self.symbol} = {_expr}>"
         return f"<{self.__class__.__name__} {_expr}>"
 
     # region Arithmetic operation handlers
@@ -363,7 +374,7 @@ class DerivedUnit(Unit):
     def __add__(self, other: int | float, /):
         if isinstance(other, (int, float)):
             return DerivedUnit(
-                _symbol=None,
+                symbol=None,
                 unit_exponents=self.unit_exponents,
                 factor=self.factor,
                 offset=self.offset + other
@@ -415,7 +426,7 @@ class DerivedUnit(Unit):
 
     @property
     def symbol(self) -> str:
-        return self._symbol
+        return self.symbol
 
     def as_quantity(self) -> Quantity:
         return Quantity(1 if not self.offset else 0, self)
@@ -460,7 +471,7 @@ class BaseUnit(Unit):
     metres per second is not a base unit.
     """
 
-    _symbol: str
+    symbol: str
     """The symbol of the unit.
 
     This value is used to generate human-readable representations of
@@ -474,13 +485,15 @@ class BaseUnit(Unit):
     """
 
     def __str__(self):
-        return self._symbol
+        return self.symbol
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
     def __pow__(self, power: Fraction, modulo=None) -> DerivedUnit:
+        if not isinstance(power, Fraction):
+            raise TypeError("power must be a Fraction")
         return DerivedUnit(None, {self: power})
 
     @overload
@@ -504,7 +517,7 @@ class BaseUnit(Unit):
     def __add__(self, other: float | int, /):
         if isinstance(other, (float, int)):
             return DerivedUnit(
-                _symbol=None,
+                symbol=None,
                 unit_exponents={self: Fraction(1)},
                 factor=1,
                 offset=other
@@ -556,10 +569,6 @@ class BaseUnit(Unit):
 
     def si_offset(self) -> float | int:
         return 0
-
-    @property
-    def symbol(self) -> str:
-        return self._symbol
 
     def with_symbol(self, symbol: str) -> Unit:
         return BaseUnit(symbol, self.dimension, self.factor)

@@ -43,6 +43,8 @@ class Dimensional(ABC):
 
 @total_ordering
 class Unit(Dimensional, ABC):
+    symbol: str | None
+
     def conversion_parameters_to(self, other: Unit, /) -> tuple[float, float]:
         """Get the conversion parameters from this unit to another unit.
 
@@ -77,11 +79,6 @@ class Unit(Dimensional, ABC):
 
     @abstractmethod
     def si_offset(self) -> float | int:
-        pass
-
-    @property
-    @abstractmethod
-    def symbol(self) -> str | None:
         pass
 
     @abstractmethod

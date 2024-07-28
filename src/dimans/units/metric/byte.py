@@ -7,7 +7,7 @@ from ...dimension import dimensions as _dimensions
 
 _data_dimension = _dimensions.get_or_register("data", "D")
 
-byte = _BaseUnit(_symbol="B", factor=8, dimension=_data_dimension)
+byte = _BaseUnit(symbol="B", factor=8, dimension=_data_dimension)
 
 (
     quettabyte,
