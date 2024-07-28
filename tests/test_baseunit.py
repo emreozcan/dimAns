@@ -193,7 +193,7 @@ def test_baseunit_using():
     one = BaseUnit("1", dim_1, 1)
     two = BaseUnit("2", dim_1, 2)
 
-    assert BaseUnit.using(one, factor=2) == two
+    assert BaseUnit.using(one, factor=2, symbol="two times one") == two
 
 
 def test_baseunit_multiplicative_inverse():

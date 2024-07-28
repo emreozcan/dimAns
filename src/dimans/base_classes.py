@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import total_ordering
-from typing import Self, TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
     from .dimension import Dimensions
@@ -16,7 +16,7 @@ class Dimensional(ABC):
         pass
 
     @abstractmethod
-    def multiplicative_inverse(self) -> Self:
+    def multiplicative_inverse(self) -> Dimensional:
         pass
 
     # region Arithmetic operations
@@ -36,7 +36,7 @@ class Dimensional(ABC):
         pass
 
     @abstractmethod
-    def __pow__(self, power, modulo=None):
+    def __pow__(self, power: Fraction | int, modulo=None):
         pass
     # endregion
 
@@ -90,7 +90,7 @@ class Unit(Dimensional, ABC):
         pass
 
     # region Comparison handlers
-    def __eq__(self, other: Unit, /) -> bool:
+    def __eq__(self, other: object, /) -> bool:
         if not isinstance(other, Unit):
             return NotImplemented
 
@@ -100,7 +100,7 @@ class Unit(Dimensional, ABC):
             return False
         return True
 
-    def __gt__(self, other: Unit, /) -> bool:
+    def __gt__(self, other: object, /) -> bool:
         if not isinstance(other, Unit):
             return NotImplemented
 
@@ -126,15 +126,29 @@ class Unit(Dimensional, ABC):
 
     # These arithmetic operations are redefined
     # from Dimensional for stricter typing.
+    @overload
+    def __mul__(self, other: Unit) -> DerivedUnit:
+        ...
+
+    @overload
+    def __mul__(self, other: float | int) -> Quantity:
+        ...
+
     @abstractmethod
-    def __mul__(self, other: Unit | float | int) -> Unit | Quantity:
+    def __mul__(self, other):
         pass
 
-    def __rmul__(self, other: Unit | float | int) -> Unit | Quantity:
+    @overload
+    def __rmul__(self, other: Unit) -> DerivedUnit: ...
+
+    @overload
+    def __rmul__(self, other: float | int) -> Quantity: ...
+
+    def __rmul__(self, other):
         return self.__mul__(other)
 
     @abstractmethod
-    def __pow__(self, power: Fraction, modulo=None) -> DerivedUnit:
+    def __pow__(self, power: Fraction | int, modulo=None) -> DerivedUnit:
         pass
 
 

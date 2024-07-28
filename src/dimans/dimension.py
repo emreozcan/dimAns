@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import dataclasses
 from collections.abc import MutableMapping, Mapping
 from fractions import Fraction
-from typing import overload, Self
+from typing import overload
 
 from .base_classes import Dimensional
 
@@ -102,7 +104,7 @@ dimensions.register("amount of substance", "N")
 class Dimensions(Mapping[Dimension, Fraction], Dimensional):
     _map: dict[Dimension, Fraction]
 
-    def __init__(self, mapping: Mapping[Dimension, Fraction] = None):
+    def __init__(self, mapping: Mapping[Dimension, Fraction] | None = None):
         if mapping is not None:
             self._map = dict(mapping)
         else:
@@ -123,10 +125,10 @@ class Dimensions(Mapping[Dimension, Fraction], Dimensional):
     def __repr__(self):
         return f"<{self.__class__.__name__} {self._map}>"
 
-    def dimensions(self) -> Self:
+    def dimensions(self) -> Dimensions:
         return self
 
-    def multiplicative_inverse(self) -> Self:
+    def multiplicative_inverse(self) -> Dimensions:
         return Dimensions({d: -p for d, p in self._map.items()})
 
     def __getitem__(self, __key):
@@ -152,20 +154,22 @@ class Dimensions(Mapping[Dimension, Fraction], Dimensional):
 
     __rmul__ = __mul__
 
-    def __truediv__(self, other: Self) -> Self:
+    def __truediv__(self, other: Dimensions) -> Dimensions:
         if isinstance(other, Dimensions):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
-    def __rtruediv__(self, other: Self) -> Self:
+    def __rtruediv__(self, other: Dimensions) -> Dimensions:
         if isinstance(other, Dimensions):
             return other * self.multiplicative_inverse()
         return NotImplemented
 
-    def __pow__(self, power: Fraction, modulo=None) -> Self:
-        if isinstance(power, Fraction):
-            return Dimensions({d: p * power for d, p in self._map.items()})
-        return NotImplemented
+    def __pow__(self, power: Fraction | int, modulo=None) -> Dimensions:
+        if not isinstance(power, Fraction):
+            if not hasattr(power, "__index__"):
+                return NotImplemented
+            power = Fraction(power.__index__())
+        return Dimensions({d: p * power for d, p in self._map.items()})
     # endregion
 
 

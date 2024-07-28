@@ -1,6 +1,7 @@
 from fractions import Fraction as _Fraction
 from math import pi as _pi
 
+from . import Quantity
 from .units import metric as _metric
 from .units import si as _si
 

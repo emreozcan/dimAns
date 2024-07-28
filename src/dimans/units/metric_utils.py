@@ -1,9 +1,10 @@
 import dataclasses
 from collections.abc import Sequence
 from fractions import Fraction
+from typing import TypeVar
 
 from ..base_classes import Unit
-from .. import BaseUnit
+from .. import BaseUnit, DerivedUnit
 
 __all__ = [
     "MetricPrefix",
@@ -60,7 +61,14 @@ binary_metric_prefixes = [
 ]
 
 
-def map_to_units(unit: Unit, prefix_list: Sequence[MetricPrefix]) -> list[Unit]:
+AnyUnit = TypeVar("AnyUnit", Unit, BaseUnit, DerivedUnit)
+
+
+def map_to_units(unit: AnyUnit, prefix_list: Sequence[MetricPrefix]) \
+        -> list[AnyUnit]:
+    if unit.symbol is None:
+        raise ValueError("Unit must have a symbol")
+
     if not isinstance(unit, BaseUnit):
         return [
             (unit * float(prefix.factor))
@@ -77,9 +85,9 @@ def map_to_units(unit: Unit, prefix_list: Sequence[MetricPrefix]) -> list[Unit]:
     ]
 
 
-def make_metric_units(unit: Unit) -> list[Unit]:
+def make_metric_units(unit: AnyUnit) -> list[AnyUnit]:
     return map_to_units(unit, metric_prefixes)
 
 
-def make_binary_metric_units(unit: Unit) -> list[Unit]:
+def make_binary_metric_units(unit: AnyUnit) -> list[AnyUnit]:
     return map_to_units(unit, binary_metric_prefixes)

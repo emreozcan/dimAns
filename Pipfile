@@ -8,3 +8,5 @@ name = "pypi"
 [dev-packages]
 pytest = "~=7.4"
 flit = "~=3.4"
+coverage = "*"
+mypy = "*"

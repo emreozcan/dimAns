@@ -4,7 +4,7 @@ import dataclasses
 from collections.abc import Mapping, Sequence
 from fractions import Fraction
 from functools import total_ordering
-from typing import Self, Literal, SupportsIndex, overload
+from typing import Literal, SupportsIndex, overload
 
 from .base_classes import Unit, Dimensional
 from .dimension import Dimensions, Dimension
@@ -23,7 +23,7 @@ __version__ = "0.0.13"
 @dataclasses.dataclass(slots=True, frozen=True, eq=False)
 class Quantity(Dimensional):
     value: int | float
-    unit: Unit
+    unit: DerivedUnit
 
     def __str__(self):
         unit_str = str(self.unit)
@@ -45,16 +45,16 @@ class Quantity(Dimensional):
         )
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: Fraction | int, modulo=None) -> Self:
+    def __pow__(self, power: Fraction | int, modulo=None) -> Quantity:
         if isinstance(power, int):
             power = Fraction(power)
         if isinstance(power, Fraction):
             return Quantity(self.value ** power, self.unit ** power)
         return NotImplemented
 
-    def __mul__(self, other: Self | Unit | float | int, /) -> Quantity:
+    def __mul__(self, other: Quantity | Unit | float | int, /) -> Quantity:
         if isinstance(other, Quantity):
-            new_unit: DerivedUnit = self.unit * other.unit
+            new_unit = self.unit * other.unit
             # TODO: Decide whether this is a good idea.
             # if not new_unit.dimensions():
             #     return self.value * other.value * new_unit.si_factor()
@@ -78,12 +78,12 @@ class Quantity(Dimensional):
 
     __radd__ = __add__
 
-    def __sub__(self, other: Quantity | Literal[0], /) -> Self:
+    def __sub__(self, other: Quantity | Literal[0], /) -> Quantity:
         if isinstance(other, Quantity):
             return self + other.additive_inverse()
         return NotImplemented
 
-    def __rsub__(self, other: Quantity | Literal[0], /) -> Self:
+    def __rsub__(self, other: Quantity | Literal[0], /) -> Quantity:
         return other + self.additive_inverse()
 
     def __abs__(self):
@@ -95,7 +95,7 @@ class Quantity(Dimensional):
     def __floor__(self):
         return Quantity(self.value.__floor__(), self.unit)
 
-    def __truediv__(self, other: Self | Unit | float | int, /) -> Self:
+    def __truediv__(self, other: Quantity | Unit | float | int, /) -> Quantity:
         if isinstance(other, Quantity):
             return self * other.multiplicative_inverse()
         if isinstance(other, Unit):
@@ -104,7 +104,7 @@ class Quantity(Dimensional):
             return Quantity(self.value / other, self.unit)
         return NotImplemented
 
-    def __rtruediv__(self, other: Self | Unit | float | int, /) -> Self:
+    def __rtruediv__(self, other: Quantity | Unit | float | int, /) -> Quantity:
         if isinstance(other, Quantity):
             return self.multiplicative_inverse() * other
         if isinstance(other, Unit):
@@ -117,7 +117,7 @@ class Quantity(Dimensional):
         return NotImplemented
 
     def __divmod__(self, other: Quantity | Unit, /) \
-            -> tuple[int, Quantity] | NotImplemented:
+            -> tuple[int | float, Quantity]:
         if isinstance(other, Quantity):
             if self.unit != other.unit:
                 return divmod(self.to(other.unit), other)
@@ -127,7 +127,7 @@ class Quantity(Dimensional):
             return divmod(self, other.as_quantity())
         return NotImplemented
 
-    def __floordiv__(self, other: Self | Unit | float | int, /) -> Self:
+    def __floordiv__(self, other: Quantity | Unit | float | int, /) -> Quantity:
         if isinstance(other, Quantity):
             new_unit = self.unit / other.unit
             # TODO: Decide whether this is a good idea.
@@ -140,7 +140,8 @@ class Quantity(Dimensional):
             return Quantity(self.value // other, self.unit)
         return NotImplemented
 
-    def __rfloordiv__(self, other: Self | Unit | float | int, /) -> Self:
+    def __rfloordiv__(self, other: Quantity | Unit | float | int, /) \
+            -> Quantity:
         if isinstance(other, Quantity):
             new_unit = other.unit / self.unit
             # TODO: Decide whether this is a good idea.
@@ -156,7 +157,7 @@ class Quantity(Dimensional):
             )
         return NotImplemented
 
-    def __mod__(self, other: Self | Unit, /) -> Self:
+    def __mod__(self, other: Quantity | Unit, /) -> Quantity:
         if isinstance(other, Quantity):
             if self.unit != other.unit:
                 return self.to(other.unit) % other
@@ -165,24 +166,24 @@ class Quantity(Dimensional):
             return self % other.as_quantity()
         return NotImplemented
 
-    def __neg__(self) -> Self:
+    def __neg__(self) -> Quantity:
         return Quantity(-self.value, self.unit)
 
-    def __round__(self, ndigits: SupportsIndex) -> Self:
+    def __round__(self, ndigits: SupportsIndex) -> Quantity:
         return Quantity(round(self.value, ndigits), self.unit)
     # endregion
 
     # region Comparison handlers
-    def __eq__(self, other: Self, /) -> bool:
-        if isinstance(other, Quantity):
-            if self.dimensions() != other.dimensions():
-                return False
-            if self.underlying_value() != other.underlying_value():
-                return False
-            return True
-        return NotImplemented
+    def __eq__(self, other: object, /) -> bool:
+        if not isinstance(other, Quantity):
+            return NotImplemented
+        if self.dimensions() != other.dimensions():
+            return False
+        if self.underlying_value() != other.underlying_value():
+            return False
+        return True
 
-    def __gt__(self, other: Self) -> bool:
+    def __gt__(self, other: Quantity) -> bool:
         if isinstance(other, Quantity):
             if self.dimensions() != other.dimensions():
                 raise ValueError(f"units must have the same dimensions")
@@ -237,7 +238,7 @@ class Quantity(Dimensional):
             quantities.append(result * unit)
         return quantities
 
-    def as_derived_unit(self, symbol: str = None) -> DerivedUnit:
+    def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
         return DerivedUnit(
             symbol,
             self.unit.unit_exponents,
@@ -287,11 +288,11 @@ class DerivedUnit(Unit):
     @classmethod
     def using(
         cls,
-        ref: Self, /,
+        ref: DerivedUnit, /,
         symbol: str | None = None,
         factor: float = 1,
         offset: float = 0,
-    ) -> Self:
+    ) -> DerivedUnit:
         return cls(
             symbol,
             ref.unit_exponents,
@@ -323,20 +324,22 @@ class DerivedUnit(Unit):
         return f"<{self.__class__.__name__} {_expr}>"
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: Fraction, modulo=None) -> Self:
-        if isinstance(power, Fraction):
-            return DerivedUnit(
-                None,
-                {
-                    base_unit: exponent * power
-                    for base_unit, exponent in self.unit_exponents.items()
-                },
-                self.factor ** power
-            )
-        return NotImplemented
+    def __pow__(self, power: Fraction | int, modulo=None) -> DerivedUnit:
+        if not isinstance(power, Fraction):
+            if not hasattr(power, "__index__"):
+                return NotImplemented
+            power = Fraction(power.__index__())
+        return DerivedUnit(
+            None,
+            {
+                base_unit: exponent * power
+                for base_unit, exponent in self.unit_exponents.items()
+            },
+            self.factor ** power
+        )
 
     @overload
-    def __mul__(self, other: Unit, /) -> Self: ...
+    def __mul__(self, other: Unit, /) -> DerivedUnit: ...
     @overload
     def __mul__(self, other: float | int, /) -> Quantity: ...
 
@@ -382,15 +385,22 @@ class DerivedUnit(Unit):
 
         return NotImplemented
 
-    def __truediv__(self, other: Self | Literal[1], /) -> Self | Quantity:
+    def __truediv__(self, other: DerivedUnit | Literal[1], /) \
+            -> DerivedUnit:
         if other == 1:
             return self
         if isinstance(other, DerivedUnit):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
+    @overload
+    def __rtruediv__(self, other: Unit) -> DerivedUnit: ...
+
+    @overload
+    def __rtruediv__(self, other: float | int) -> Quantity: ...
+
     def __rtruediv__(self, other: Unit | float | int, /) \
-            -> Self | Unit | Quantity:
+            -> DerivedUnit | Quantity:
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
@@ -424,14 +434,10 @@ class DerivedUnit(Unit):
     def si_offset(self) -> float:
         return self.offset
 
-    @property
-    def symbol(self) -> str:
-        return self.symbol
-
     def as_quantity(self) -> Quantity:
         return Quantity(1 if not self.offset else 0, self)
 
-    def multiplicative_inverse(self) -> Self:
+    def multiplicative_inverse(self) -> DerivedUnit:
         if self.offset:
             raise ValueError("can't invert offset unit")
         return DerivedUnit(
@@ -443,7 +449,7 @@ class DerivedUnit(Unit):
             1 / self.factor
         )
 
-    def as_derived_unit(self, symbol: str | None = None) -> Self:
+    def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
         return DerivedUnit(
             symbol,
             self.unit_exponents,
@@ -491,9 +497,11 @@ class BaseUnit(Unit):
         return f"<{self.__class__.__name__} {self}>"
 
     # region Arithmetic operation handlers
-    def __pow__(self, power: Fraction, modulo=None) -> DerivedUnit:
+    def __pow__(self, power: Fraction | int, modulo=None) -> DerivedUnit:
         if not isinstance(power, Fraction):
-            raise TypeError("power must be a Fraction")
+            if not hasattr(power, "__index__"):
+                return NotImplemented
+            power = Fraction(power.__index__())
         return DerivedUnit(None, {self: power})
 
     @overload
@@ -524,8 +532,8 @@ class BaseUnit(Unit):
             )
         return NotImplemented
 
-    def __truediv__(self, other: Self | Literal[1], /) \
-            -> Self | DerivedUnit | Quantity:
+    def __truediv__(self, other: BaseUnit | Literal[1], /) \
+            -> BaseUnit | DerivedUnit | Quantity:
         if other == 1:
             return self
         if isinstance(other, Unit):
@@ -554,10 +562,10 @@ class BaseUnit(Unit):
     @classmethod
     def using(
         cls,
-        ref: Self, /,
-        symbol: str | None = None,
+        ref: BaseUnit, /,
+        symbol: str,
         factor: float | int = 1,
-    ) -> Self:
+    ) -> BaseUnit:
         return cls(
             symbol,
             ref.dimension,
