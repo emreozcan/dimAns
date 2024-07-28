@@ -59,9 +59,8 @@ class DimensionRegistry(MutableMapping[str, Dimension]):
 
         if name in self:
             return self[name]
-        else:
-            self[name] = dimension
-            return dimension
+        self[name] = dimension
+        return dimension
 
     def __setitem__(self, __key, __value):
         if __key in self._dimensions:
@@ -138,15 +137,14 @@ class Dimensions(Mapping[Dimension, Fraction], Dimensional):
 
     # region Arithmetic operations
     def __mul__(self, other):
-        if isinstance(other, Dimensions):
-            return Dimensions(
-                {
-                    k: (self.get(k, 0) + other.get(k, 0))
-                    for k in set(self.keys()) | set(other.keys())
-                }
-            )
-        else:
+        if not isinstance(other, Dimensions):
             return NotImplemented
+        return Dimensions(
+            {
+                k: (self.get(k, 0) + other.get(k, 0))
+                for k in set(self.keys()) | set(other.keys())
+            }
+        )
 
     __rmul__ = __mul__
 
