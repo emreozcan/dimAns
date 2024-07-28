@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 
 [dev-packages]
-pytest = "~=7.4"
-flit = "~=3.4"
-coverage = "*"
-mypy = "*"
 black = "*"
+coverage = "*"
+flit = "~=3.4"
+mypy = "*"
+pytest = "~=7.4"
 pytest-cov = "*"
