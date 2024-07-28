@@ -1,13 +1,8 @@
-from ..si_derived.joule import (joule as _joule)
+from ..si_derived.joule import joule as _joule
 from ..metric_utils import make_metric_units as _make_metric_units
 
 
-electron_volt = (
-    (
-        1.602_176_634
-        / (10 ** 19)
-    ) * _joule
-).as_derived_unit("eV")
+electron_volt = ((1.602_176_634 / (10**19)) * _joule).as_derived_unit("eV")
 
 (
     quettaelectron_volt,

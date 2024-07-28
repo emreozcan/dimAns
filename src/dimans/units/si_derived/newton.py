@@ -3,7 +3,7 @@ from ..si_base.metre import metre as _metre
 from ..si_base.second import second as _second
 from ..metric_utils import make_metric_units as _make_metric_units
 
-newton = (_kilogram * _metre / _second ** 2).as_derived_unit("N")
+newton = (_kilogram * _metre / _second**2).as_derived_unit("N")
 
 (
     quettanewton,

@@ -38,6 +38,7 @@ class Dimensional(ABC):
     @abstractmethod
     def __pow__(self, power: Fraction | int, modulo=None):
         pass
+
     # endregion
 
 
@@ -108,6 +109,7 @@ class Unit(Dimensional, ABC):
             raise ValueError(f"units must have the same dimensions")
 
         return self.si_factor() > other.si_factor()
+
     # endregion
 
     def __hash__(self) -> int:
@@ -127,12 +129,10 @@ class Unit(Dimensional, ABC):
     # These arithmetic operations are redefined
     # from Dimensional for stricter typing.
     @overload
-    def __mul__(self, other: Unit) -> DerivedUnit:
-        ...
+    def __mul__(self, other: Unit) -> DerivedUnit: ...
 
     @overload
-    def __mul__(self, other: float | int) -> Quantity:
-        ...
+    def __mul__(self, other: float | int) -> Quantity: ...
 
     @abstractmethod
     def __mul__(self, other):

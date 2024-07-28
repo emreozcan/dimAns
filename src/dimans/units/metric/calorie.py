@@ -28,4 +28,3 @@ calorie = (4.184 * _joule).as_derived_unit("cal")
     rontocalorie,
     quectocalorie,
 ) = _make_metric_units(calorie)
-

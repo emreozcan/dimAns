@@ -36,20 +36,14 @@ class Quantity(Dimensional):
 
     def __hash__(self):
         dim = self.dimensions()
-        return hash(
-            (
-                self.underlying_value(),
-                len(dim),
-                sum(dim.values())
-            )
-        )
+        return hash((self.underlying_value(), len(dim), sum(dim.values())))
 
     # region Arithmetic operation handlers
     def __pow__(self, power: Fraction | int, modulo=None) -> Quantity:
         if isinstance(power, int):
             power = Fraction(power)
         if isinstance(power, Fraction):
-            return Quantity(self.value ** power, self.unit ** power)
+            return Quantity(self.value**power, self.unit**power)
         return NotImplemented
 
     def __mul__(self, other: Quantity | Unit | float | int, /) -> Quantity:
@@ -111,13 +105,13 @@ class Quantity(Dimensional):
             return self.multiplicative_inverse() * other.as_quantity()
         if isinstance(other, (int, float)):
             return Quantity(
-                other / self.value,
-                self.unit.multiplicative_inverse()
+                other / self.value, self.unit.multiplicative_inverse()
             )
         return NotImplemented
 
-    def __divmod__(self, other: Quantity | Unit, /) \
-            -> tuple[int | float, Quantity]:
+    def __divmod__(
+        self, other: Quantity | Unit, /
+    ) -> tuple[int | float, Quantity]:
         if isinstance(other, Quantity):
             if self.unit != other.unit:
                 return divmod(self.to(other.unit), other)
@@ -140,8 +134,9 @@ class Quantity(Dimensional):
             return Quantity(self.value // other, self.unit)
         return NotImplemented
 
-    def __rfloordiv__(self, other: Quantity | Unit | float | int, /) \
-            -> Quantity:
+    def __rfloordiv__(
+        self, other: Quantity | Unit | float | int, /
+    ) -> Quantity:
         if isinstance(other, Quantity):
             new_unit = other.unit / self.unit
             # TODO: Decide whether this is a good idea.
@@ -152,8 +147,7 @@ class Quantity(Dimensional):
             return other.as_quantity() // self
         if isinstance(other, (int, float)):
             return Quantity(
-                other // self.value,
-                self.unit.multiplicative_inverse()
+                other // self.value, self.unit.multiplicative_inverse()
             )
         return NotImplemented
 
@@ -171,6 +165,7 @@ class Quantity(Dimensional):
 
     def __round__(self, ndigits: SupportsIndex) -> Quantity:
         return Quantity(round(self.value, ndigits), self.unit)
+
     # endregion
 
     # region Comparison handlers
@@ -189,6 +184,7 @@ class Quantity(Dimensional):
                 raise ValueError(f"units must have the same dimensions")
             return self.underlying_value() > other.underlying_value()
         return NotImplemented
+
     # endregion
 
     def underlying_value(self):
@@ -219,11 +215,7 @@ class Quantity(Dimensional):
             other = other.as_derived_unit()
         return Quantity(self.value * factor + offset, other)
 
-    def to_terms(
-        self,
-        units: Sequence[Unit],
-        sort=False
-    ) -> list[Quantity]:
+    def to_terms(self, units: Sequence[Unit], sort=False) -> list[Quantity]:
         """Convert this quantity to other units.
 
         This method returns a list of Quantity objects in the given units,
@@ -268,6 +260,7 @@ class Constant(Quantity):
 @dataclasses.dataclass(slots=True, frozen=True, eq=False, init=False)
 class DerivedUnit(Unit):
     """Represents a product of one or more base units."""
+
     symbol: str | None
     unit_exponents: Mapping[BaseUnit, Fraction]
     factor: int | float = 1
@@ -288,7 +281,8 @@ class DerivedUnit(Unit):
     @classmethod
     def using(
         cls,
-        ref: DerivedUnit, /,
+        ref: DerivedUnit,
+        /,
         symbol: str | None = None,
         factor: float = 1,
         offset: float = 0,
@@ -335,7 +329,7 @@ class DerivedUnit(Unit):
                 base_unit: exponent * power
                 for base_unit, exponent in self.unit_exponents.items()
             },
-            self.factor ** power
+            self.factor**power,
         )
 
     @overload
@@ -360,14 +354,13 @@ class DerivedUnit(Unit):
                 {
                     base_unit: exponent
                     for base_unit, exponent in {
-                        base_unit:
-                            self.unit_exponents.get(base_unit, 0) +
-                            other.unit_exponents.get(base_unit, 0)
+                        base_unit: self.unit_exponents.get(base_unit, 0)
+                        + other.unit_exponents.get(base_unit, 0)
                         for base_unit in base_units
                     }.items()
                     if exponent != 0
                 },
-                self.factor * other.factor
+                self.factor * other.factor,
             )
 
         if isinstance(other, (int, float)):
@@ -380,13 +373,12 @@ class DerivedUnit(Unit):
                 symbol=None,
                 unit_exponents=self.unit_exponents,
                 factor=self.factor,
-                offset=self.offset + other
+                offset=self.offset + other,
             )
 
         return NotImplemented
 
-    def __truediv__(self, other: DerivedUnit | Literal[1], /) \
-            -> DerivedUnit:
+    def __truediv__(self, other: DerivedUnit | Literal[1], /) -> DerivedUnit:
         if other == 1:
             return self
         if isinstance(other, DerivedUnit):
@@ -399,20 +391,24 @@ class DerivedUnit(Unit):
     @overload
     def __rtruediv__(self, other: float | int) -> Quantity: ...
 
-    def __rtruediv__(self, other: Unit | float | int, /) \
-            -> DerivedUnit | Quantity:
+    def __rtruediv__(
+        self, other: Unit | float | int, /
+    ) -> DerivedUnit | Quantity:
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
+
     # endregion
 
     def _str_with_multiplicands(self):
         if not self.unit_exponents:
             return "1"
-        return " ".join([
-            f"{base_unit}^{exponent}" if exponent != 1 else str(base_unit)
-            for base_unit, exponent in self.unit_exponents.items()
-        ])
+        return " ".join(
+            [
+                f"{base_unit}^{exponent}" if exponent != 1 else str(base_unit)
+                for base_unit, exponent in self.unit_exponents.items()
+            ]
+        )
 
     def dimensions(self):
         dimensions = {}
@@ -446,7 +442,7 @@ class DerivedUnit(Unit):
                 base_unit: -exponent
                 for base_unit, exponent in self.unit_exponents.items()
             },
-            1 / self.factor
+            1 / self.factor,
         )
 
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
@@ -528,23 +524,26 @@ class BaseUnit(Unit):
                 symbol=None,
                 unit_exponents={self: Fraction(1)},
                 factor=1,
-                offset=other
+                offset=other,
             )
         return NotImplemented
 
-    def __truediv__(self, other: BaseUnit | Literal[1], /) \
-            -> BaseUnit | DerivedUnit | Quantity:
+    def __truediv__(
+        self, other: BaseUnit | Literal[1], /
+    ) -> BaseUnit | DerivedUnit | Quantity:
         if other == 1:
             return self
         if isinstance(other, Unit):
             return self * other.multiplicative_inverse()
         return NotImplemented
 
-    def __rtruediv__(self, other: Unit | float | int, /) \
-            -> DerivedUnit | Unit | Quantity:
+    def __rtruediv__(
+        self, other: Unit | float | int, /
+    ) -> DerivedUnit | Unit | Quantity:
         if other == 1:
             return self.multiplicative_inverse()
         return other * self.multiplicative_inverse()
+
     # endregion
 
     def dimensions(self):
@@ -562,7 +561,8 @@ class BaseUnit(Unit):
     @classmethod
     def using(
         cls,
-        ref: BaseUnit, /,
+        ref: BaseUnit,
+        /,
         symbol: str,
         factor: float | int = 1,
     ) -> BaseUnit:

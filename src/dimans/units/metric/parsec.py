@@ -4,7 +4,7 @@ from ..si_base.metre import metre as _metre
 from ..metric_utils import make_metric_units as _make_metric_units
 
 
-parsec = (96_939_420_213_600_000/_pi*_metre).as_derived_unit("pc")
+parsec = (96_939_420_213_600_000 / _pi * _metre).as_derived_unit("pc")
 
 (
     quettaparsec,

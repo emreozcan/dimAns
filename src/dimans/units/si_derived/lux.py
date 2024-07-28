@@ -2,7 +2,7 @@ from .lumen import lumen as _lumen
 from ..si_base.metre import metre as _metre
 from ..metric_utils import make_metric_units as _make_metric_units
 
-lux = (_lumen / _metre ** 2).as_derived_unit("lx")
+lux = (_lumen / _metre**2).as_derived_unit("lx")
 
 (
     quettalux,

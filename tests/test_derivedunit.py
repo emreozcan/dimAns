@@ -200,9 +200,10 @@ def test_derived_unit_dimensions():
         DerivedUnit(
             symbol=None,
             unit_exponents={base_dim_1: Fraction(3, 2)},
-        ) * DerivedUnit(
-           symbol=None,
-           unit_exponents={base_dim_1_alt: Fraction(1, 2)},
+        )
+        * DerivedUnit(
+            symbol=None,
+            unit_exponents={base_dim_1_alt: Fraction(1, 2)},
         )
     ).dimensions() == Dimensions({dim_1: Fraction(2)})
 
@@ -210,9 +211,9 @@ def test_derived_unit_dimensions():
         DerivedUnit(
             symbol=None,
             unit_exponents={base_dim_1: Fraction(3, 2)},
-        ) * DerivedUnit(
-           symbol=None,
-           unit_exponents={base_dim_1_alt: Fraction(-3, 2)}
+        )
+        * DerivedUnit(
+            symbol=None, unit_exponents={base_dim_1_alt: Fraction(-3, 2)}
         )
     ).dimensions() == Dimensions({})
 

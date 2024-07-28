@@ -1,7 +1,7 @@
 from ... import BaseUnit as _BaseUnit
 from ..imperial.mass import grain as _grain, pound as _pound
 
-dram = _BaseUnit.using(_grain, "dr", (875/32))
+dram = _BaseUnit.using(_grain, "dr", (875 / 32))
 
 us_hundredweight = _BaseUnit.using(_pound, "cwt", 100)
 us_ton = _BaseUnit.using(us_hundredweight, "ton", 20)

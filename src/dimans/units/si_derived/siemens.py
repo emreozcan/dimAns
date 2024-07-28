@@ -28,4 +28,3 @@ siemens = (1 / _ohm).as_derived_unit("S")
     rontosiemens,
     quectosiemens,
 ) = _make_metric_units(siemens)
-

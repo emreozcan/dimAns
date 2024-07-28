@@ -110,7 +110,7 @@ def test_baseunit_pow():
     assert four ** Fraction(1, 2) == two
 
     with pytest.raises(TypeError):
-        assert two ** two
+        assert two**two
 
     with pytest.raises(TypeError):
         assert two ** two.as_derived_unit()
@@ -119,7 +119,7 @@ def test_baseunit_pow():
         assert two ** two.as_quantity()
 
     with pytest.raises(TypeError):
-        assert two ** 1j
+        assert two**1j
 
 
 def test_baseunit_mul():

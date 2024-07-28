@@ -28,4 +28,3 @@ angstrom = (0.1 * _nanometre).as_derived_unit("Å")
     rontoangstrom,
     quectoangstrom,
 ) = _make_metric_units(angstrom)
-

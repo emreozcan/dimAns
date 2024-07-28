@@ -28,4 +28,3 @@ radian = (_metre / _metre).as_derived_unit("rad")
     rontoradian,
     quectoradian,
 ) = _make_metric_units(radian)
-

@@ -29,4 +29,3 @@ henry = (_ohm * _second).as_derived_unit("H")
     rontohenry,
     quectohenry,
 ) = _make_metric_units(henry)
-

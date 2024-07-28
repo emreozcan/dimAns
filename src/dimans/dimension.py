@@ -28,12 +28,10 @@ class DimensionRegistry(MutableMapping[str, Dimension]):
             self._dimensions = {}
 
     @overload
-    def register(self, dimension: Dimension):
-        ...
+    def register(self, dimension: Dimension): ...
 
     @overload
-    def register(self, name: str, symbol: str):
-        ...
+    def register(self, name: str, symbol: str): ...
 
     def register(self, _a, _b=None):
         if isinstance(_a, Dimension) and _b is None:
@@ -44,12 +42,10 @@ class DimensionRegistry(MutableMapping[str, Dimension]):
             raise TypeError("Invalid arguments")
 
     @overload
-    def get_or_register(self, dimension: Dimension) -> Dimension:
-        ...
+    def get_or_register(self, dimension: Dimension) -> Dimension: ...
 
     @overload
-    def get_or_register(self, name: str, symbol: str) -> Dimension:
-        ...
+    def get_or_register(self, name: str, symbol: str) -> Dimension: ...
 
     def get_or_register(self, _a, _b=None):
         if isinstance(_a, Dimension) and _b is None:
@@ -170,6 +166,7 @@ class Dimensions(Mapping[Dimension, Fraction], Dimensional):
                 return NotImplemented
             power = Fraction(power.__index__())
         return Dimensions({d: p * power for d, p in self._map.items()})
+
     # endregion
 
 
