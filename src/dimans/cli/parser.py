@@ -261,31 +261,31 @@ class CalculatorEvaluator(Transformer):
         # endregion
 
         # region add our functions
-        def func1_dim(x):
+        def func_dim(x):
             if isinstance(x, Dimensional):
                 return x.dimensions()
             raise Exception("value is not Dimensional")
-        self.func_map["dim"] = func1_dim
+        self.func_map["dim"] = func_dim
 
-        def func1_unit(x):
+        def func_unit(x):
             if isinstance(x, Quantity):
                 return x.unit
             if isinstance(x, Unit):
                 return x
             raise Exception("value does not have a unit")
-        self.func_map["unit"] = func1_unit
+        self.func_map["unit"] = func_unit
 
-        def func1_val(x):
+        def func_val(x):
             if isinstance(x, Quantity):
                 return x.value
             raise Exception("value is not a Quantity")
-        self.func_map["val"] = func1_val
+        self.func_map["val"] = func_val
 
-        def func1_uval(x):
+        def func_uval(x):
             if isinstance(x, Quantity):
                 return x.underlying_value()
             raise Exception("value is not a Quantity")
-        self.func_map["uval"] = func1_uval
+        self.func_map["uval"] = func_uval
         # endregion
 
     add = staticmethod(operator.add)
