@@ -38,6 +38,9 @@ class Quantity(Dimensional):
         dim = self.dimensions()
         return hash((self.underlying_value(), len(dim), sum(dim.values())))
 
+    def __bool__(self) -> bool:
+        return bool(self.underlying_value())
+
     # region Arithmetic operation handlers
     def __pow__(self, power: Fraction | int, modulo=None) -> Quantity:
         if isinstance(power, int):
