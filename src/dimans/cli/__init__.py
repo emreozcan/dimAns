@@ -84,7 +84,7 @@ def read_and_process_line():
                 return True
             return False
 
-        convert_nodes = list(evaled_line.find_pred(convert_node_finder))
+        convert_nodes = list(parsed_line.find_pred(convert_node_finder))
         if not convert_nodes:
             result_repr = evaled_line.to(get_canonical_unit(evaled_line))
 
