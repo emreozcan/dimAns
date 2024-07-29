@@ -226,11 +226,13 @@ class Quantity(Dimensional):
         """
         if sort:
             units = sorted(units, reverse=True)
-        remaining = self
-        quantities = []
+        remainder: Quantity = self
+        quantities: list[Quantity] = []
         for unit in units:
-            result, remaining = divmod(remaining, unit)
-            quantities.append(result * unit)
+            full_times, remainder = divmod(remainder, unit)
+            quantities.append(int(full_times) * unit)
+        if remainder:
+            quantities.append(remainder)
         return quantities
 
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
