@@ -1,6 +1,7 @@
 import inspect
 import math
 import operator
+import sys
 from fractions import Fraction
 from numbers import Number
 from pathlib import Path
@@ -291,6 +292,11 @@ class CalculatorEvaluator(Transformer):
             raise Exception("value is not a Quantity")
 
         self.func_map["uval"] = func_uval
+
+        def func_exit():
+            sys.exit(0)
+
+        self.func_map["exit"] = func_exit
         # endregion
 
     add = staticmethod(operator.add)
