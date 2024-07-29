@@ -307,7 +307,7 @@ class CalculatorEvaluator(Transformer):
         try:
             return self.ident_map[name]
         except KeyError:
-            raise CalcError(f"Unknown identifier {name.value!r}, see `?units` and `?constants`")
+            raise CalcError(f"Unknown identifier {name.value!r}")
 
     def convert(self, source, target):
         if not isinstance(source, Quantity):
@@ -355,7 +355,7 @@ class CalculatorEvaluator(Transformer):
         try:
             return self.func_map[name](*args)
         except KeyError:
-            raise CalcError(f"Unknown function {name.value!r}, see `?functions`")
+            raise CalcError(f"Unknown function {name.value!r}")
         except Exception as e:
             raise CalcError(f"{name}: {e}")
 
