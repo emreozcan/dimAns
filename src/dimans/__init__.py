@@ -184,7 +184,7 @@ class Quantity(Dimensional):
     def __gt__(self, other: Quantity) -> bool:
         if isinstance(other, Quantity):
             if self.dimensions() != other.dimensions():
-                raise ValueError(f"units must have the same dimensions")
+                raise ValueError("units must have the same dimensions")
             return self.underlying_value() > other.underlying_value()
         return NotImplemented
 
@@ -212,7 +212,7 @@ class Quantity(Dimensional):
         if isinstance(other, Quantity):
             other = other.as_derived_unit()
         if self.unit.dimensions() != other.dimensions():
-            raise ValueError(f"target unit must have the same dimensions")
+            raise ValueError("target unit must have the same dimensions")
         factor, offset = self.unit.conversion_parameters_to(other)
         if not isinstance(other, DerivedUnit):
             other = other.as_derived_unit()

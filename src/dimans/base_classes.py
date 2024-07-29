@@ -55,7 +55,7 @@ class Unit(Dimensional, ABC):
         to get a measurement in the other unit.
         """
         if self.dimensions() != other.dimensions():
-            raise ValueError(f"units must have the same dimensions")
+            raise ValueError("units must have the same dimensions")
 
         from_factor, to_factor = self.si_factor(), other.si_factor()
         from_offset, to_offset = self.si_offset(), other.si_offset()
@@ -106,7 +106,7 @@ class Unit(Dimensional, ABC):
             return NotImplemented
 
         if self.dimensions() != other.dimensions():
-            raise ValueError(f"units must have the same dimensions")
+            raise ValueError("units must have the same dimensions")
 
         return self.si_factor() > other.si_factor()
 
