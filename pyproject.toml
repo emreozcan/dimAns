@@ -9,11 +9,19 @@ maintainers = [
 ]
 readme = "README.md"
 classifiers = [
+    # https://pypi.org/classifiers/
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
+    "Topic :: Utilities",
 ]
 keywords = ["units", "calculation", "calculator", "constants"]
 requires-python = "~=3.11"
