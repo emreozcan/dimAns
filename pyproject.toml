@@ -34,7 +34,6 @@ dimans = "dimans.cli:main"
 [project.optional-dependencies]
 cli = [
     "lark",
-    "regex",
     "rich",
 ]
 

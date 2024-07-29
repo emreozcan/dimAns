@@ -5,8 +5,8 @@ import sys
 from fractions import Fraction
 from numbers import Number
 from pathlib import Path
+import re
 
-import regex
 from lark import Lark, Transformer, v_args, Token
 
 from .. import (
@@ -27,7 +27,7 @@ class CalcError(Exception):
         self.msg = msg
 
 
-non_letter_regex = regex.compile(r"[^a-zA-Z]")
+non_letter_regex = re.compile(r"[^a-zA-Z]")
 
 with open(Path(__file__).parent / "cli.lark", "r", encoding="utf-8") as f:
     calculator_grammar = f.read()
@@ -123,15 +123,13 @@ class CalculatorEvaluator(Transformer):
         }
 
         for ident, constant in constant_list:
-            constant: Quantity | Fraction
-            constant: Quantity | float = 1.0 * constant
+            constant = 1.0 * constant
             name = non_letter_regex.sub("", ident)
             ident_map[name] = constant
             if name.endswith("constant"):
                 ident_map[name[:-8]] = constant
 
         for ident, unit in unit_list:
-            unit: BaseUnit | DerivedUnit
             unit = unit.as_derived_unit(unit.symbol)
             unit = DerivedUnit(
                 symbol=unit.symbol,
@@ -374,7 +372,7 @@ class CalculatorEvaluator(Transformer):
             if p.kind == p.kind.POSITIONAL_OR_KEYWORD
             and p.default is not p.empty
         )
-        max_params = len(sig.parameters)
+        max_params: int | None = len(sig.parameters)
         for param in sig.parameters.values():
             if param.kind == param.kind.VAR_POSITIONAL:
                 max_params = None
