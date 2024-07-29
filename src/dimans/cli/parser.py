@@ -28,7 +28,6 @@ class CalcError(Exception):
 
 non_letter_regex = regex.compile(r"[^a-zA-Z]")
 
-
 with open(Path(__file__).parent / "cli.lark", "r", encoding="utf-8") as f:
     calculator_grammar = f.read()
 parser = Lark(
@@ -196,7 +195,7 @@ class CalculatorEvaluator(Transformer):
         def factorial(x):
             if not isinstance(x, int):
                 x = int(x)
-            if x > 2**8:
+            if x > 2 ** 8:
                 raise OverflowError("argument must not be greater than 2^8")
             return math.factorial(x)
 
@@ -249,9 +248,9 @@ class CalculatorEvaluator(Transformer):
             "comb": lambda x, y: math.comb(x, y),
             "copysign": lambda x, y: abs(x) * int(math.copysign(1, y)),
             "perm": lambda x, y: math.perm(x, y),
-            "pow": lambda x, y: x**y,
+            "pow": lambda x, y: x ** y,
             "atan2": lambda x, y: math.atan2(x, y),
-            "dist": lambda x, y: math.sqrt(x**2 + y**2),
+            "dist": lambda x, y: math.sqrt(x ** 2 + y ** 2),
             "mod": lambda x, y: operator.mod(x, y),
 
             "add": lambda x, y: x + y,
@@ -259,6 +258,7 @@ class CalculatorEvaluator(Transformer):
             "mul": lambda x, y: x * y,
             "div": lambda x, y: x / y,
         })
+
         # endregion
 
         # region add our functions
@@ -266,6 +266,7 @@ class CalculatorEvaluator(Transformer):
             if isinstance(x, Dimensional):
                 return x.dimensions()
             raise Exception("value is not Dimensional")
+
         self.func_map["dim"] = func_dim
 
         def func_unit(x):
@@ -274,18 +275,21 @@ class CalculatorEvaluator(Transformer):
             if isinstance(x, Unit):
                 return x
             raise Exception("value does not have a unit")
+
         self.func_map["unit"] = func_unit
 
         def func_val(x):
             if isinstance(x, Quantity):
                 return x.value
             raise Exception("value is not a Quantity")
+
         self.func_map["val"] = func_val
 
         def func_uval(x):
             if isinstance(x, Quantity):
                 return x.underlying_value()
             raise Exception("value is not a Quantity")
+
         self.func_map["uval"] = func_uval
         # endregion
 
