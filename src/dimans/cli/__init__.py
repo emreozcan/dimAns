@@ -1,48 +1,53 @@
 import lark
+from rich.console import Console
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit
 from .. import Quantity
 
 prompt = ">>> "
-prompt_result = "  = "
-prompt_empty = " " * len(prompt)
+prompt_res = "  = "
+prompt_pre = " " * len(prompt)
+
+
+console = Console()
 
 
 def main():
     while True:
-        in_line = input(prompt)
+        in_line = console.input(prompt=prompt)
 
         try:
             parsed_line = parser.parse(in_line)
         except lark.UnexpectedInput as e:
-            line = in_line.splitlines()[e.line - 1]
             if isinstance(e, lark.UnexpectedToken):
                 size = max(len(e.token), 1)
                 message = f"Unexpected {e.token.type} token {e.token.value!r}"
-                allowed_token_names = list(e.accepts or e.expected)
+                allowed_token_names = e.accepts | e.expected
             elif isinstance(e, lark.UnexpectedCharacters):
                 size = 1
                 message = f"No terminal matches {e.char!r}"
-                allowed_token_names = list(e.allowed)
+                allowed_token_names = e.allowed
             elif isinstance(e, lark.UnexpectedEOF):
                 size = 1
                 message = "Unexpected EOF"
-                allowed_token_names = [t.type for t in e.expected]
+                allowed_token_names = {t for t in e.expected}
             else:
                 size = 1
                 message = "Unexpected input"
                 allowed_token_names = []
+            allowed_token_names = list(allowed_token_names)
             allowed_token_names.sort()
 
-            print(f"{prompt_empty}{' ' * (e.column - 1)}{'^' * size}")
-            print(message)
+            if e.column > 0:
+                console.print(f"{prompt_pre}{' ' * (e.column - 1)}{'^' * size}")
+            console.print(message)
 
             if len(allowed_token_names) == 1:
-                print(f"Expected {allowed_token_names[0]}")
+                console.print(f"Expected {allowed_token_names[0]}")
             else:
-                print(f"Expected one of:")
+                console.print(f"Expected one of:")
                 for allowed_token_name in allowed_token_names:
-                    print(f"\t{allowed_token_name}")
+                    console.print(f"\t{allowed_token_name}")
             continue
 
         try:
@@ -57,7 +62,6 @@ def main():
                 column = e.obj.column
                 size = e.obj.end_column - e.obj.column
 
-            line = in_line.splitlines()[line_no - 1]
             if isinstance(e.orig_exc, CalcError):
                 message = e.orig_exc.msg
             elif isinstance(e.orig_exc, OverflowError):
@@ -65,8 +69,8 @@ def main():
             else:
                 message = str(e.orig_exc)
 
-            print(f"{prompt_empty}{' ' * (column - 1)}{'^' * size}")
-            print(message)
+            console.print(f"{prompt_pre}{' ' * (column - 1)}{'^' * size}")
+            console.print(message)
             continue
 
         result_repr = evaled_line
@@ -82,4 +86,4 @@ def main():
             if not convert_nodes:
                 result_repr = evaled_line.to(get_canonical_unit(evaled_line))
 
-        print(f"{prompt_result}{result_repr}")
+        console.print(f"{prompt_res}{result_repr}")
