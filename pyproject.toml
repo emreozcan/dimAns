@@ -24,9 +24,18 @@ classifiers = [
     "Topic :: Utilities",
 ]
 keywords = ["units", "calculation", "calculator", "constants"]
-requires-python = "~=3.11"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 dynamic = ["version",]
+
+[project.scripts]
+dimans = "dimans.cli:main"
+
+[project.optional-dependencies]
+cli = [
+    "regex",
+    "lark",
+]
 
 [project.urls]
 Repository = "https://github.com/emreozcan/dimans"

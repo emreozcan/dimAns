@@ -1,0 +1,37 @@
+?expr: sum
+     | expr _ARROW sum -> convert
+     | expr _ARROW "(" sum ("," sum)* ","? ")" -> sumconvert
+
+?sum: product
+    | sum "+" product -> add
+    | sum "-" product -> sub
+
+?product: exponential
+        | product "*" exponential   -> mul
+        | product ident             -> mul
+        | product "/" exponential   -> div
+        | product "mod" exponential -> mod
+
+?exponential: atom
+            | atom "^" exponential -> pow
+            | "-" exponential      -> neg
+            | "+" exponential
+
+?atom: NUMBER       -> number
+     | "(" expr ")"
+     | ident
+     | func
+
+?func: FUNCNAME "(" sum ("," sum)* ","? ")"
+
+?ident: IDENT -> ident
+
+IDENT: /[a-zA-Z'`′″"°_][a-zA-Z0-9'`′″"°_]*/
+FUNCNAME: ("a".."z" | "A".."Z") ("a".."z" | "A".."Z" | "0".."9")*
+
+_ARROW: "->"
+
+%import common.NUMBER
+%import common.WS
+
+%ignore WS
