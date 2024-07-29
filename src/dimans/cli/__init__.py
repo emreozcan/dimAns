@@ -1,11 +1,13 @@
+import readline
+
 import lark
 from rich.console import Console
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit
 from .. import Quantity
 
-prompt = ">>> "
-prompt_res = "  = "
+prompt = ""
+prompt_res = ""
 prompt_pre = " " * len(prompt)
 
 
