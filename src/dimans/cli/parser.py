@@ -1,3 +1,4 @@
+import inspect
 import math
 import operator
 from fractions import Fraction
@@ -353,11 +354,56 @@ class CalculatorEvaluator(Transformer):
 
     def func(self, name: Token, *args):
         try:
-            return self.func_map[name](*args)
+            func_obj = self.func_map[name]
         except KeyError:
             raise CalcError(f"Unknown function {name.value!r}")
+
+        sig = inspect.signature(func_obj)
+        min_params = sum(
+            1 for p in sig.parameters.values()
+            if p.kind == p.kind.POSITIONAL_OR_KEYWORD
+            and p.default is not p.empty
+        )
+        max_params = len(sig.parameters)
+        for param in sig.parameters.values():
+            if param.kind == param.kind.VAR_POSITIONAL:
+                max_params = None
+                break
+
+        param_count = len(args)
+        if max_params is not None:
+            if not (min_params <= param_count <= max_params):
+                if min_params == max_params:
+                    if min_params == 1:
+                        raise CalcError(
+                            f"Function {name.value!r} takes 1 parameter "
+                            f"({param_count} given)"
+                        )
+                    raise CalcError(
+                        f"Function {name.value!r} takes {min_params} "
+                        f"parameters ({param_count} given)"
+                    )
+                raise CalcError(
+                    f"Function {name.value!r} takes {min_params} to "
+                    f"{max_params} parameters ({param_count} given)"
+                )
+        elif not (min_params <= param_count):
+            if min_params == 1:
+                raise CalcError(
+                    f"Function {name.value!r} takes at least 1 parameter "
+                    f"({param_count} given)"
+                )
+            raise CalcError(
+                f"Function {name.value!r} takes at least {min_params}"
+                f"parameters ({param_count} given)"
+            )
+
+        try:
+            ret_val = func_obj(*args)
         except Exception as e:
-            raise CalcError(f"{name}: {e}")
+            raise CalcError(f"{name.value}: {e}")
+
+        return ret_val
 
 
 evaluator = CalculatorEvaluator()

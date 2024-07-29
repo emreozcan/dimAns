@@ -22,7 +22,7 @@
      | ident
      | func
 
-?func: FUNCNAME "(" sum ("," sum)* ","? ")"
+func: FUNCNAME "(" (sum ("," sum)*)? ","? ")"
 
 ?ident: IDENT -> ident
 
