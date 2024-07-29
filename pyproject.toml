@@ -35,6 +35,7 @@ dimans = "dimans.cli:main"
 cli = [
     "lark",
     "regex",
+    "rich",
 ]
 
 [project.urls]
