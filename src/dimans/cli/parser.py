@@ -2,9 +2,8 @@ import inspect
 import math
 import operator
 import sys
-from collections.abc import Mapping
+from collections.abc import Mapping, Callable
 from fractions import Fraction
-from numbers import Number
 from pathlib import Path
 import re
 from typing import TypeVar
@@ -40,9 +39,9 @@ parser = Lark(
 )
 
 
-def create_ident_map() -> dict[str, Unit | Quantity | Number]:
+def create_ident_map() -> dict[str, Unit | Quantity | float]:
     # region get the list of all units and constants
-    unit_list: list[Unit] = [
+    unit_list: list[tuple[str, Unit]] = [
         x
         for x in (
             *(units.__dict__.items()),
@@ -51,14 +50,14 @@ def create_ident_map() -> dict[str, Unit | Quantity | Number]:
         if isinstance(x[1], Unit)
     ]
 
-    constant_list: list[Quantity | Number] = [
+    constant_list: list[tuple[str, Quantity | float]] = [
         x
         for x in constants.__dict__.items()
-        if isinstance(x[1], (Quantity, Number))
+        if isinstance(x[1], (Quantity, float, int))
     ]
     # endregion
 
-    ident_map: dict[str, Unit | Quantity | Number] = {
+    ident_map: dict[str, Unit | Quantity | float] = {
         "c": constants.speed_of_light_in_vacuum,
         "h": constants.planck_constant,
         "hbar": constants.reduced_planck_constant,
@@ -191,7 +190,7 @@ VT = TypeVar("VT")
 
 
 def reverse_map(__map: Mapping[KT, VT], /) -> dict[VT, list[KT]]:
-    reversed_map: dict[Unit | Quantity | Number, list[str]] = {}
+    reversed_map = {}
     for k, v in __map.items():
         if v not in reversed_map:
             reversed_map[v] = [k]
@@ -200,7 +199,7 @@ def reverse_map(__map: Mapping[KT, VT], /) -> dict[VT, list[KT]]:
     return reversed_map
 
 
-def create_functions_map() -> dict[str, callable]:
+def create_functions_map() -> dict[str, Callable]:
     def factorial(x):
         if not isinstance(x, int):
             x = int(x)
@@ -225,7 +224,7 @@ def create_functions_map() -> dict[str, callable]:
         "trunc": lambda x: math.trunc(x),
         "cbrt": lambda x: x ** (Fraction(1, 3)),
         "exp": lambda x: math.exp(x),
-        "exp2": lambda x: math.exp2(x),
+        "exp2": lambda x: dimensional_pow(2.0, x),
         "expm1": lambda x: math.expm1(x),
         "log": lambda x, base=math.e: math.log(x, base),
         "log1p": lambda x: math.log1p(x),
@@ -307,7 +306,15 @@ def create_functions_map() -> dict[str, callable]:
     func_map["exit"] = func_exit
     # endregion
 
-    return func_map
+    # mypy says that we return "dict[str, function]" instead of the annotated
+    # "dict[str, Callable]" and that they're incompatible, apparently.
+    return func_map  # type: ignore
+
+
+def dimensional_pow(left, right) -> float:
+    if isinstance(left, Dimensional):
+        right = Fraction(right).limit_denominator()
+    return left ** right
 
 
 @v_args(inline=True)
@@ -329,11 +336,8 @@ class CalculatorEvaluator(Transformer):
     str = str
     number = float
 
-    @staticmethod
-    def pow(left, right):
-        if isinstance(left, Dimensional):
-            right = Fraction(right).limit_denominator()
-        return left ** right
+    pow = staticmethod(dimensional_pow)
+
 
     def ident(self, name: Token):
         try:
@@ -460,4 +464,6 @@ def get_canonical_unit(value: Quantity) -> Unit:
     if dims == TIME_MINUS_ONE_DIMENSIONS:
         aliases = [x for x in aliases if "Hz" in x]
 
-    return evaluator.ident_map[min(aliases, key=len)]
+    canonical_unit = evaluator.ident_map[min(aliases, key=len)]
+    assert isinstance(canonical_unit, Unit)
+    return canonical_unit
