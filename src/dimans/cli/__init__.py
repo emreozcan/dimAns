@@ -1,4 +1,7 @@
-import readline
+try:
+    import readline
+except ModuleNotFoundError:
+    pass
 
 import lark
 from rich.console import Console
