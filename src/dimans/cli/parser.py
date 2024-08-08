@@ -121,6 +121,7 @@ def create_ident_map() -> dict[str, Unit | Quantity | Number]:
 
     for ident, constant in constant_list:
         constant = 1.0 * constant
+        ident_map[ident] = constant
         name = non_letter_regex.sub("", ident)
         ident_map[name] = constant
         if name.endswith("_constant"):
@@ -136,6 +137,7 @@ def create_ident_map() -> dict[str, Unit | Quantity | Number]:
             factor=unit.factor,
             offset=unit.offset,
         )
+        ident_map[ident] = unit
         name = non_letter_regex.sub("", ident)
         ident_map[name] = unit
         if name != "inch" and name[-1] != "s":
