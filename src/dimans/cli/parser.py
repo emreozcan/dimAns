@@ -344,6 +344,10 @@ class CalculatorEvaluator(Transformer):
         try:
             return self.ident_map[name]
         except KeyError:
+            if name in self.func_map:
+                raise CalcError(f"Unknown identifier {name.value!r}\n"
+                                f"However, there is a function with that name.")
+
             raise CalcError(f"Unknown identifier {name.value!r}")
 
     def convert(self, source, target):
@@ -392,6 +396,10 @@ class CalculatorEvaluator(Transformer):
         try:
             func_obj = self.func_map[name]
         except KeyError:
+            if name in self.ident_map:
+                raise CalcError(f"Unknown function {name.value!r}\n"
+                                f"However, there is a value with that name.")
+
             raise CalcError(f"Unknown function {name.value!r}")
 
         sig = inspect.signature(func_obj)
