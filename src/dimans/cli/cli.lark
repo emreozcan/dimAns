@@ -15,7 +15,7 @@
 ?exponential: atom
             | atom "^" exponential -> pow
             | "-" exponential      -> neg
-            | "+" exponential
+            | "+" exponential      -> pos
 
 ?atom: NUMBER       -> number
      | "(" expr ")"

@@ -333,6 +333,7 @@ class CalculatorEvaluator(Transformer):
     div = staticmethod(operator.truediv)
     mod = staticmethod(operator.mod)
     neg = staticmethod(operator.neg)
+    pos = staticmethod(operator.pos)
     str = str
     number = float
 
