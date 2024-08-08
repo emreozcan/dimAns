@@ -18,9 +18,9 @@ from .. import (
     Quantity,
     Unit,
     Dimensional,
-    DerivedUnit
+    DerivedUnit, Dimensions
 )
-from ..units import unusual as units_unusual
+from ..units import unusual as units_unusual, hertz
 
 
 class CalcError(Exception):
@@ -438,7 +438,15 @@ class CalculatorEvaluator(Transformer):
 evaluator = CalculatorEvaluator()
 
 
+EMPTY_DIMENSIONS = Dimensions()
+TIME_MINUS_ONE_DIMENSIONS = hertz.dimensions()
+
+
 def get_canonical_unit(value: Quantity) -> Unit:
+    dims = value.dimensions()
+    if dims == EMPTY_DIMENSIONS:
+        return value.unit
+
     if value.unit not in evaluator.reverse_ident_map:
         return value.unit
 
@@ -447,7 +455,7 @@ def get_canonical_unit(value: Quantity) -> Unit:
 
     aliases = evaluator.reverse_ident_map[value.unit]
 
-    if value.dimensions() == {dimension.dimensions.get("time"): -1}:
+    if dims == TIME_MINUS_ONE_DIMENSIONS:
         aliases = [x for x in aliases if "Hz" in x]
 
     return evaluator.ident_map[min(aliases, key=len)]
