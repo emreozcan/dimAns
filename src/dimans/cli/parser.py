@@ -126,7 +126,9 @@ class CalculatorEvaluator(Transformer):
             constant = 1.0 * constant
             name = non_letter_regex.sub("", ident)
             ident_map[name] = constant
-            if name.endswith("constant"):
+            if name.endswith("_constant"):
+                ident_map[name[:-9]] = constant
+            elif name.endswith("constant"):
                 ident_map[name[:-8]] = constant
 
         for ident, unit in unit_list:
