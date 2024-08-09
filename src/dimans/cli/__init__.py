@@ -44,6 +44,17 @@ class Results(VerticalScroll):
 
     def add_result(self, line: str, parsed: Tree, result: CalcResult):
         self.results.append((line, parsed, result))
+        self.mount_all(
+            [
+                Static(f"r({len(self.results)})", classes="result-id"),
+                Static("=", classes="result-eq"),
+                Static(
+                    line + "\n" + represent_result(parsed, result),
+                    classes="result-repr"
+                ),
+            ],
+            before=0
+        )
 
     def compose(self) -> ComposeResult:
         max_result = len(self.results) - 1
@@ -218,7 +229,6 @@ class DimansApp(App):
         results_container = self.query_one(Results)
         evaluator.results.append((in_line, parsed_line, evaled_line))
         results_container.add_result(in_line, parsed_line, evaled_line)
-        await results_container.recompose()
         event.input.clear()
 
 
