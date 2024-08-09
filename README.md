@@ -44,3 +44,12 @@ pipx install --upgrade dimans[cli]
 ```bash
 dimans
 ```
+<p>
+<img
+    src="https://raw.githubusercontent.com/emreozcan/dimAns/master/imgs/calculator.svg"
+    alt="dimAns Calculator Screenshot: Main Screen"
+    width="50%"><img
+    src="https://raw.githubusercontent.com/emreozcan/dimAns/master/imgs/search.svg"
+    alt="dimAns Calculator Screenshot: Command Search"
+    width="50%">
+</p>
