@@ -127,11 +127,10 @@ class DimansIdents(Provider):
                 ident_name=ident_name,
                 ident_value=ident_value,
                 help_text=(
-                    f"{get_names_overview(ident_value)}\n"
-                    f"{DerivedUnit.using(ident_value)}"
+                    f"{DerivedUnit.using(ident_value)} "
+                    f"({get_shortest_name(ident_value)})"
                 ) if isinstance(ident_value, DerivedUnit) else (
-                    f"{get_names_overview(ident_value)}\n"
-                    f"{str(ident_value)}"
+                    f"{str(ident_value)} ({get_shortest_name(ident_value)})"
                 )
             )
             for ident_name, ident_value in evaluator.ident_map.items()
