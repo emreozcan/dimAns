@@ -323,6 +323,17 @@ def create_functions_map() -> dict[str, Callable]:
 
 
 function_help_texts: dict[str, dict[str, str]] = {
+    "dimAns Calculator functions": {
+        "exit": "Exits the interactive calculator session.",
+        "r": "Returns the result of the `n`th calculation.",
+        "ans": "Returns `r(-1)`."
+    },
+    "dimAns functions": {
+        "dim": "Returns the dimensions of `x`.",
+        "unit": "Returns the unit of `x`.",
+        "val": "Returns the value of `x`.",
+        "uval": "Returns the underlying value of `x`.",
+    },
     "Number-theoretic and representation functions": {
         "ceil": "Returns the smallest integer greater than or equal to `x`.",
         "comb": "Returns the number of ways to choose `k` items from `n` items "
@@ -385,24 +396,13 @@ function_help_texts: dict[str, dict[str, str]] = {
         "lgamma": "Returns the natural logarithm of the absolute value of the"
                   "Gamma function at `x`.",
     },
-    "dimAns functions": {
-        "dim": "Returns the dimensions of `x`.",
-        "unit": "Returns the unit of `x`.",
-        "val": "Returns the value of `x`.",
-        "uval": "Returns the underlying value of `x`.",
-    },
-    "dimAns Calculator functions": {
-        "exit": "Exits the interactive calculator session.",
-        "r": "Returns the result of the `n`th calculation.",
-        "ans": "Returns `r(-1)`."
-    },
     "Operator functions": {
         "add": "Returns `x + y`.",
         "sub": "Returns `x - y`.",
         "mul": "Returns `x * y`.",
         "div": "Returns `x / y`.",
         "neg": "Returns `-x`.",
-    }
+    },
 }
 function_help_text_map = {}
 for category_funcs in function_help_texts.values():
