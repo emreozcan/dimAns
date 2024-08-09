@@ -89,6 +89,7 @@ class HistoryInput(Input):
 
 
 class DimansApp(App):
+    TITLE = "Dimans CLI"
     CSS_PATH = "style.tcss"
 
     def compose(self) -> ComposeResult:
