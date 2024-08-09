@@ -67,8 +67,14 @@ class HistoryInput(Input):
         self.history = []
         self.history_index = 0
 
-    def on_input_submitted(self) -> None:
-        self.history.append(self.value)
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        if not event.value:
+            if self.history:
+                event.stop()
+                self.value = self.history[-1]
+                self.post_message(Input.Submitted(self, self.value))
+            return
+        self.history.append(event.value)
         self.history_index = 0
 
     def action_history_back(self):
