@@ -157,12 +157,44 @@ class DimansIdents(Provider):
                 )
 
 
+class CommandifiedFunction(NamedTuple):
+    func_name: str
+    func_name_with_args: str
+    func_obj: Callable
+    help_text: str | None
+
+
+class DimansFunctions(Provider):
+    async def startup(self):
+        self.precalculated_list: list[CommandifiedFunction] = [
+            CommandifiedFunction(
+                func_name=func_name,
+                func_name_with_args=get_name_of_function(func_obj, func_name),
+                func_obj=func_obj,
+                help_text=None,
+            )
+            for func_name, func_obj in evaluator.func_map.items()
+        ]
+
+    async def search(self, query: str) -> Hits:
+        matcher = self.matcher(query)
+        app = self.app
+        assert isinstance(app, DimansApp)
+
+        for metadata in self.precalculated_list:
+            score = matcher.match(metadata.func_name_with_args)
+
+            if score > 0.5:
                 yield Hit(
                     score,
-                    matcher.highlight(command_name),
-                    partial(app.action_insert, ident_name),
-                    text=command_name,
-                    help=help_text,
+                    matcher.highlight(metadata.func_name_with_args),
+                    partial(
+                        app.action_insert,
+                        f"{metadata.func_name}()",
+                        len(metadata.func_name) + 1,
+                    ),
+                    text=metadata.func_name_with_args,
+                    help=metadata.help_text,
                 )
 
 
@@ -171,6 +203,7 @@ class DimansApp(App):
     CSS_PATH = "style.tcss"
     COMMANDS = {
         DimansIdents,
+        DimansFunctions
     }
 
     def compose(self) -> ComposeResult:

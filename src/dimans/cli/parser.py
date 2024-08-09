@@ -537,3 +537,8 @@ def get_names_overview(value: Quantity | float | Unit) -> str:
         return shortest_name
 
     return f"{longest_name} ({shortest_name})"
+
+
+def get_name_of_function(func_obj, name) -> str:
+    sig = inspect.signature(func_obj)
+    return f"{name}{sig}"
