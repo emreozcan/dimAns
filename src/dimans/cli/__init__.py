@@ -1,11 +1,14 @@
+from argparse import ArgumentParser, Namespace
 from collections.abc import Callable
 from functools import partial
+from pathlib import Path
 from typing import NamedTuple
 
 import lark
 from lark import Tree
 from rich.console import Console, Group
 from rich.markdown import Markdown
+from rich.padding import Padding
 from rich.style import Style
 from rich.table import Table
 from rich.text import Text
@@ -427,5 +430,40 @@ class DimansApp(App):
 app = DimansApp()
 
 
+arg_parser = ArgumentParser(description="dimAns Calculator CLI")
+arg_parser.add_argument("--profile", action="store_true", help="Profile the app")
+arg_parser.add_argument("--profile-file", type=Path, metavar="FILE",
+                        help="File to dump the profile stats to")
+arg_parser.add_argument("--list-functions", action="store_true",
+                        help="List all functions and exit")
+
+
 def main():
+    args = arg_parser.parse_args()
+
+    if args.profile:
+        import cProfile
+        with cProfile.Profile() as pr:
+            run(args)
+            pr.dump_stats(args.profile_file or "profile.stats")
+    else:
+        run(args)
+
+
+def run(args: Namespace):
+    if args.list_functions:
+        for category, functions in function_help_texts.items():
+            console.print(Text(f"{category}", style="bold"))
+            for func_name, func_help in functions.items():
+                func_obj = evaluator.func_map[func_name]
+                signature = get_name_of_function(func_obj, func_name)
+                console.print(Text(f"  {signature}", style="#FFA800"))
+                console.print(
+                    Padding(
+                        Markdown(func_help, style="italic"),
+                        pad=(0, 0, 0, 4),
+                    )
+                )
+            console.print()
+        exit(0)
     app.run()
