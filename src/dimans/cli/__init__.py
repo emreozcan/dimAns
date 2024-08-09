@@ -3,6 +3,7 @@ from lark import Tree
 from rich.console import Console
 from textual import on
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll, Container
 from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
     Static
@@ -54,6 +55,39 @@ class Results(VerticalScroll):
             )
 
 
+class HistoryInput(Input):
+    BINDINGS = [
+        Binding("up", "history_back", "history back", show=False),
+        Binding("down", "history_forward", "history forward", show=False),
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.history = []
+        self.history_index = 0
+
+    def on_input_submitted(self) -> None:
+        self.history.append(self.value)
+        self.history_index = 0
+
+    def action_history_back(self):
+        if self.history_index < len(self.history):
+            self.history_index += 1
+            self.value = self.history[-self.history_index]
+            self.action_end()
+        else:
+            self.action_home()
+
+    def action_history_forward(self):
+        if self.history_index > 0:
+            self.history_index -= 1
+            if self.history_index == 0:
+                self.value = ""
+            else:
+                self.value = self.history[-self.history_index]
+                self.action_end()
+
+
 class DimansApp(App):
     CSS_PATH = "style.tcss"
 
@@ -63,7 +97,7 @@ class DimansApp(App):
             with Vertical():
                 yield Results()
                 yield Label(id="result-label")
-                yield Input(id="line-input")
+                yield HistoryInput(id="line-input")
         yield Footer()
 
     def on_mount(self):
