@@ -339,7 +339,7 @@ class CalculatorEvaluator(Transformer):
     reverse_ident_map = reverse_map(ident_map)
     func_map = create_functions_map()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.results: ResultListType = []
 

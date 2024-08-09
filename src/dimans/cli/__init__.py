@@ -36,7 +36,7 @@ def represent_result(parsed_line, evaled_line) -> str:
 
 
 class Results(VerticalScroll):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.results: ResultListType = []
 
@@ -119,7 +119,7 @@ class DimansApp(App):
 
         func_calls = parsed_line.find_data("func")
         for func_call in func_calls:
-            func_name = func_call.children[0].value
+            func_name = func_call.children[0].value  # type: ignore
             if func_name in ["exit"]:
                 event.input.add_class("success")
                 result_label.update("<Submitting will exit>")
