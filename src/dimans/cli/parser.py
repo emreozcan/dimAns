@@ -312,8 +312,8 @@ def create_functions_map() -> dict[str, Callable]:
 
     # region add functions that are handled by the interpreter
     func_map.update({
-        "r": lambda x: raiser(NotImplementedError()),
         "r": lambda n: raiser(NotImplementedError()),
+        "ans": lambda: raiser(NotImplementedError()),
     })
     # endregion
 
@@ -394,6 +394,7 @@ function_help_texts: dict[str, dict[str, str]] = {
     "dimAns Calculator functions": {
         "exit": "Exits the interactive calculator session.",
         "r": "Returns the result of the `n`th calculation.",
+        "ans": "Returns `r(-1)`."
     },
     "Operator functions": {
         "add": "Returns `x + y`.",
@@ -547,6 +548,8 @@ class CalculatorEvaluator(Transformer):
 
         if name == "r":
             return self.function_r(*args)
+        if name == "ans":
+            return self.function_ans()
 
         try:
             ret_val = func_obj(*args)
@@ -566,6 +569,11 @@ class CalculatorEvaluator(Transformer):
             return self.results[index][2]
         except IndexError:
             raise CalcError(f"Unknown result {index}")
+
+    def function_ans(self):
+        if self.results:
+            return self.results[-1][2]
+        raise CalcError("No previous result")
 
 
 evaluator = CalculatorEvaluator()
