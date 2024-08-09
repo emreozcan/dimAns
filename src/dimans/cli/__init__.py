@@ -1,16 +1,19 @@
+from functools import partial
+
 import lark
 from lark import Tree
 from rich.console import Console
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
+from textual.command import Provider, Hits, Hit, DiscoveryHit
 from textual.containers import Horizontal, Vertical, VerticalScroll, Container
 from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
     Static
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit, \
-    ResultListType, CalcResult
-from .. import Quantity, Unit
+    ResultListType, CalcResult, get_longest_name, get_names_overview
+from .. import Quantity, Unit, DerivedUnit
 
 try:
     import readline
@@ -106,9 +109,44 @@ class HistoryInput(Input):
                 self.action_end()
 
 
+class DimansIdents(Provider):
+    async def search(self, query: str) -> Hits:
+        matcher = self.matcher(query)
+        app = self.app
+        assert isinstance(app, DimansApp)
+
+        for ident_name, ident_value in evaluator.ident_map.items():
+            kind = "Unit: " if isinstance(ident_value, Unit) else "Constant: "
+            command_name = kind + ident_name
+            score = matcher.match(command_name)
+
+            if score > 0:
+                if isinstance(ident_value, DerivedUnit):
+                    help_text = (
+                        f"{get_names_overview(ident_value)}\n"
+                        f"{ident_value._str_with_multiplicands()}"
+                    )
+                else:
+                    help_text = (
+                        f"{get_names_overview(ident_value)}\n"
+                        f"{str(ident_value)}"
+                    )
+
+                yield Hit(
+                    score,
+                    matcher.highlight(command_name),
+                    partial(app.action_insert, ident_name),
+                    text=command_name,
+                    help=help_text,
+                )
+
+
 class DimansApp(App):
     TITLE = "Dimans CLI"
     CSS_PATH = "style.tcss"
+    COMMANDS = {
+        DimansIdents,
+    }
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -230,6 +268,16 @@ class DimansApp(App):
         evaluator.results.append((in_line, parsed_line, evaled_line))
         results_container.add_result(in_line, parsed_line, evaled_line)
         event.input.clear()
+
+    def action_insert(self, text: str):
+        line_input = self.query_one("#line-input", Input)
+        insertion_pos = line_input.cursor_position
+        line_input.value = (
+            line_input.value[:insertion_pos]
+            + text
+            + line_input.value[insertion_pos:]
+        )
+        line_input.cursor_position = insertion_pos + len(text)
 
 
 app = DimansApp()

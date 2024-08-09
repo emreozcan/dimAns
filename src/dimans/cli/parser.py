@@ -507,3 +507,27 @@ def get_canonical_unit(value: Quantity) -> Unit:
     canonical_unit = evaluator.ident_map[min(aliases, key=len)]
     assert isinstance(canonical_unit, Unit)
     return canonical_unit
+
+
+def get_longest_name(value: Quantity | float | Unit) -> str:
+    if value not in evaluator.reverse_ident_map:
+        return str(value)
+    aliases = evaluator.reverse_ident_map[value]
+    return max(aliases, key=len)
+
+
+def get_shortest_name(value: Quantity | float | Unit) -> str:
+    if value not in evaluator.reverse_ident_map:
+        return str(value)
+    aliases = evaluator.reverse_ident_map[value]
+    return min(aliases, key=len)
+
+
+def get_names_overview(value: Quantity | float | Unit) -> str:
+    shortest_name = get_shortest_name(value)
+    longest_name = get_longest_name(value)
+
+    if shortest_name == longest_name:
+        return shortest_name
+
+    return f"{longest_name} ({shortest_name})"
