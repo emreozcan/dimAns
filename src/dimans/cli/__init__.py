@@ -349,6 +349,12 @@ class FunctionSelector(ModalScreen):
                 )
                 for func_name, func_help in functions.items()
             ])
+            function_list.add_option(
+                Option(
+                    prompt=Text(category, Style(bold=True)),
+                    disabled=True,
+                )
+            )
 
     @on(OptionList.OptionSelected, "#function-list")
     def on_function_selected(self, event: OptionList.OptionSelected):
