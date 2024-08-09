@@ -25,6 +25,9 @@
     color: gray;
     width: 100%;
 }
+#result-label.error {
+    color: $error 60%;
+}
 
 #result-log {
     padding: 0 1;
