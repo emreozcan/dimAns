@@ -48,7 +48,8 @@ class Results(VerticalScroll):
     def compose(self) -> ComposeResult:
         max_result = len(self.results) - 1
         for number, result in enumerate(reversed(self.results)):
-            yield Static(f"r({max_result-number}) =", classes="result-id")
+            yield Static(f"r({max_result-number})", classes="result-id")
+            yield Static("=", classes="result-eq")
             yield Static(
                 result[0] + "\n" + represent_result(result[1], result[2]),
                 classes="result-repr"
