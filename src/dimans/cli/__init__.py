@@ -93,6 +93,7 @@ class HistoryInput(Input):
             return
         self.history.append(event.value)
         self.history_index = 0
+        self.placeholder = event.value
 
     def action_history_back(self):
         if self.history_index < len(self.history):
