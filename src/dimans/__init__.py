@@ -16,7 +16,7 @@ __all__ = [
     "BaseUnit",
 ]
 
-__version__ = "0.0.20"
+__version__ = "0.0.21"
 
 
 @total_ordering
