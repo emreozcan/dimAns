@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 import lark
-from lark import Tree
+import textual.widgets
 from rich.console import Console, Group
 from rich.markdown import Markdown
 from rich.padding import Padding
@@ -19,7 +19,7 @@ from textual.command import Provider, Hits, Hit, DiscoveryHit
 from textual.containers import Horizontal, Vertical, VerticalScroll, Container
 from textual.screen import ModalScreen, Screen
 from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
-    Static, OptionList
+    Static, OptionList, Button
 from textual.widgets.option_list import Option, Separator
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit, \
@@ -58,7 +58,7 @@ class Results(VerticalScroll):
         super().__init__()
         self.results: ResultListType = []
 
-    def add_result(self, line: str, parsed: Tree, result: CalcResult):
+    def add_result(self, line: str, parsed: lark.Tree, result: CalcResult):
         self.results.append((line, parsed, result))
         self.mount_all(
             [
@@ -208,8 +208,65 @@ class DimansFunctions(Provider):
                 )
 
 
+class Debugger(ModalScreen):
+    CSS_PATH = "style/debugger.tcss"
 
-class FunctionSelector(Screen):
+    BINDINGS = [
+        Binding("escape", "app.pop_screen", "close debugger"),
+    ]
+
+    @classmethod
+    def is_open(cls, app: App) -> bool:
+        return type(app.screen) is cls
+
+    def compose(self) -> ComposeResult:
+        app = self.app
+        assert isinstance(app, DimansApp)
+        input_element = app.screen_stack[0].query_one(HistoryInput)
+        if not input_element.history:
+            error_container = Container(id="error-container")
+            error_container.border_title = "Debugger Error"
+            with error_container:
+                yield Label("No history to debug")
+                with Container(id="button-container"):
+                    yield Button("Close",
+                                 id="close-debugger",
+                                 classes="-error")
+            return
+        last_input = input_element.history[-1]
+        debugger_container = Container(id="debugger-container")
+        debugger_container.border_title = "Debugger"
+        with debugger_container:
+            ui_tree = textual.widgets.Tree(label=f"<Final result>")
+            parse_tree = parser.parse(last_input)
+            self.recurse_tree(parse_tree, ui_tree.root, last_input)
+            ui_tree.root.expand()
+            yield ui_tree
+
+    def recurse_tree(
+        self,
+        parse_node: lark.Tree | lark.Token,
+        ui_node: textual.widgets._tree.TreeNode,
+        line: str,
+    ):
+        if isinstance(parse_node, lark.Tree):
+            node_value = evaluator.transform(parse_node)
+            t = line[parse_node.meta.column - 1:parse_node.meta.end_column - 1]
+            new_node = ui_node.add(repr(t))
+            new_node.add_leaf(f"{parse_node.data}")
+            for child in parse_node.children:
+                self.recurse_tree(child, new_node, line)
+            new_node.add_leaf(f"Result: {node_value}")
+        elif isinstance(parse_node, lark.Token):
+            ui_node.add_leaf(f"Terminal {parse_node.type}: "
+                             f"{parse_node.value!r}")
+
+    @on(Button.Pressed, "#close-debugger")
+    def on_close_debugger(self):
+        self.app.pop_screen()
+
+
+class FunctionSelector(ModalScreen):
     BINDINGS = [
         Binding("escape", "app.pop_screen", "close function selector"),
     ]
@@ -277,15 +334,17 @@ class FunctionSelector(Screen):
 
 class DimansApp(App):
     TITLE = "Dimans CLI"
-    CSS_PATH = "style.tcss"
+    CSS_PATH = "style/app.tcss"
     COMMANDS = {
         DimansIdents,
         DimansFunctions
     }
     BINDINGS = [
         Binding("f1", "show_function_selector", "function selector"),
+        Binding("f2", "show_debugger", "debugger"),
+        Binding("escape", "keyboard_interrupt", "back", show=False),
         Binding("ctrl+c", "keyboard_interrupt", "back", show=False),
-        Binding("ctrl+q", "quit", "quit", show=True),
+        Binding("ctrl+q", "quit", "quit", show=True, priority=True),
     ]
 
     def __init__(self):
@@ -425,8 +484,10 @@ class DimansApp(App):
         line_input.cursor_position = insertion_pos + forwards
 
     def action_show_function_selector(self):
-        if not FunctionSelector.is_open(self):
-            self.push_screen(FunctionSelector())
+        self.push_screen(FunctionSelector())
+
+    def action_show_debugger(self):
+        self.push_screen(Debugger())
 
     async def action_keyboard_interrupt(self) -> None:
         if self.screen_stack[-1].id != "_default":

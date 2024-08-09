@@ -1,0 +1,34 @@
+Debugger {
+    align: center middle;
+}
+Debugger > Container#error-container {
+    height: auto;
+    max-width: 48;
+    width: auto;
+    border: panel $error;
+}
+Debugger > Container#error-container > Label {
+    padding: 1 2;
+    width: 100%;
+    text-align: center;
+}
+Debugger > Container#error-container > Container#button-container {
+    height: auto;
+    align: center middle;
+}
+Debugger > Container#error-container > Container#button-container > Button#close-debugger {
+    text-align: center;
+    align: center middle;
+}
+
+Debugger > Container#debugger-container {
+    height: auto;
+    max-width: 96;
+    width: 100%;
+    border: panel $primary;
+}
+Debugger > Container#debugger-container > Tree {
+    height: auto;
+    max-height: 100%;
+    background: transparent;
+}
