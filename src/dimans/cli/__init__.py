@@ -26,7 +26,7 @@ from .parser import parser, evaluator, CalcError, get_canonical_unit, \
     ResultListType, CalcResult, get_longest_name, get_names_overview, \
     CalcOutcome, non_letter_regex, get_name_of_function, function_help_texts, \
     function_help_text_map, get_shortest_name
-from .. import Quantity, Unit, DerivedUnit
+from .. import Quantity, Unit, DerivedUnit, __version__ as dimans_version
 
 try:
     import readline
@@ -334,7 +334,8 @@ class FunctionSelector(ModalScreen):
 
 
 class DimansApp(App):
-    TITLE = "Dimans CLI"
+    TITLE = "dimAns Calculator"
+    SUB_TITLE = f"Version {dimans_version}"
     CSS_PATH = "style/app.tcss"
     COMMANDS = {
         DimansIdents,
@@ -509,7 +510,7 @@ class DimansApp(App):
 app = DimansApp()
 
 
-arg_parser = ArgumentParser(description="dimAns Calculator CLI")
+arg_parser = ArgumentParser(description="dimAns Calculator")
 arg_parser.add_argument("--profile", action="store_true", help="Profile the app")
 arg_parser.add_argument("--profile-file", type=Path, metavar="FILE",
                         help="File to dump the profile stats to")
