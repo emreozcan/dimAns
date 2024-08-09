@@ -132,7 +132,7 @@ class CommandifiedIdent(NamedTuple):
 
 
 class DimansIdents(Provider):
-    async def startup(self):
+    async def startup(self) -> None:
         self.precalculated_list: list[CommandifiedIdent] = [
             CommandifiedIdent(
                 ident_name=ident_name,
@@ -175,7 +175,7 @@ class CommandifiedFunction(NamedTuple):
 
 
 class DimansFunctions(Provider):
-    async def startup(self):
+    async def startup(self) -> None:
         self.precalculated_list: list[CommandifiedFunction] = [
             CommandifiedFunction(
                 func_name=func_name,
@@ -237,6 +237,7 @@ class Debugger(ModalScreen):
         debugger_container = Container(id="debugger-container")
         debugger_container.border_title = "Debugger"
         with debugger_container:
+            ui_tree: textual.widgets.Tree
             ui_tree = textual.widgets.Tree(label=f"<Final result>")
             parse_tree = parser.parse(last_input)
             self.recurse_tree(parse_tree, ui_tree.root, last_input)
@@ -329,7 +330,7 @@ class FunctionSelector(ModalScreen):
         app = self.app
         assert isinstance(app, DimansApp)
         app.pop_screen()
-        app.action_insert(f"{event.option.id}()", len(event.option.id) + 1)
+        app.action_insert(f"{event.option.id}()", -1)
 
 
 class DimansApp(App):
@@ -471,7 +472,7 @@ class DimansApp(App):
         results_container.add_result(in_line, parsed_line, evaled_line)
         event.input.clear()
 
-    def action_insert(self, text: str, forwards: int = None):
+    def action_insert(self, text: str, forwards: int | None = None):
         if forwards is None:
             forwards = len(text)
         line_input = self.query_one("#line-input", Input)
@@ -481,7 +482,10 @@ class DimansApp(App):
             + text
             + line_input.value[insertion_pos:]
         )
-        line_input.cursor_position = insertion_pos + forwards
+        if forwards > 0:
+            line_input.cursor_position = insertion_pos + forwards
+        else:
+            line_input.cursor_position = insertion_pos + len(text) - forwards
 
     def action_show_function_selector(self):
         self.push_screen(FunctionSelector())
