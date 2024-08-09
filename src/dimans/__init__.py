@@ -232,7 +232,10 @@ class Quantity(Dimensional):
             full_times, remainder = divmod(remainder, unit)
             quantities.append(int(full_times) * unit)
         if remainder:
-            quantities.append(remainder)
+            if quantities:
+                quantities[-1] = quantities[-1] + remainder
+            else:
+                quantities = [remainder]
         return quantities
 
     def as_derived_unit(self, symbol: str | None = None) -> DerivedUnit:
