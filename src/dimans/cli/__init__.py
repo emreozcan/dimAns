@@ -284,6 +284,8 @@ class DimansApp(App):
     }
     BINDINGS = [
         Binding("f1", "show_function_selector", "function selector"),
+        Binding("ctrl+c", "keyboard_interrupt", "back", show=False),
+        Binding("ctrl+q", "quit", "quit", show=True),
     ]
 
     def __init__(self):
@@ -425,6 +427,18 @@ class DimansApp(App):
     def action_show_function_selector(self):
         if not FunctionSelector.is_open(self):
             self.push_screen(FunctionSelector())
+
+    async def action_keyboard_interrupt(self) -> None:
+        if self.screen_stack[-1].id != "_default":
+            await self.action_back()
+        else:
+            input = self.query_one(HistoryInput)
+            with input.prevent(Input.Changed):
+                input.clear()
+            input.remove_class("error", "success")
+            label = self.query_one("#result-label", Label)
+            label.remove_class("error")
+            label.update("<KeyboardInterrupt>")
 
 
 app = DimansApp()
