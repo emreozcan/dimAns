@@ -226,7 +226,7 @@ class DimansFunctions(Provider):
                     partial(
                         app.action_insert,
                         f"{metadata.func_name}()",
-                        len(metadata.func_name) + 1,
+                        -1,
                     ),
                     text=metadata.func_name_with_args,
                     help=metadata.help_text,
@@ -517,7 +517,7 @@ class DimansApp(App):
         if forwards > 0:
             line_input.cursor_position = insertion_pos + forwards
         else:
-            line_input.cursor_position = insertion_pos + len(text) - forwards
+            line_input.cursor_position = insertion_pos + len(text) + forwards
 
     def action_show_function_selector(self):
         self.push_screen(FunctionSelector())
