@@ -47,3 +47,17 @@ Results .result-id {
 Results .result-eq {
     color: gray;
 }
+
+FunctionSelector {
+    layout: grid;
+    grid-size: 1;
+    grid-columns: 1fr;
+    grid-rows: 1fr;
+    height: 100%;
+    background: $surface 60%;
+    align: center middle;
+}
+#function-list {
+    max-width: 72;
+    background: $surface 60%;
+}

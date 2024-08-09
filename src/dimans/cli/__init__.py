@@ -4,18 +4,25 @@ from typing import NamedTuple
 
 import lark
 from lark import Tree
-from rich.console import Console
+from rich.console import Console, Group
+from rich.markdown import Markdown
+from rich.style import Style
+from rich.table import Table
+from rich.text import Text
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.command import Provider, Hits, Hit, DiscoveryHit
 from textual.containers import Horizontal, Vertical, VerticalScroll, Container
+from textual.screen import ModalScreen, Screen
 from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
-    Static
+    Static, OptionList
+from textual.widgets.option_list import Option, Separator
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit, \
     ResultListType, CalcResult, get_longest_name, get_names_overview, \
-    CalcOutcome, non_letter_regex, get_name_of_function
+    CalcOutcome, non_letter_regex, get_name_of_function, function_help_texts, \
+    function_help_text_map, get_shortest_name
 from .. import Quantity, Unit, DerivedUnit
 
 try:
@@ -198,6 +205,73 @@ class DimansFunctions(Provider):
                 )
 
 
+
+class FunctionSelector(Screen):
+    BINDINGS = [
+        Binding("escape", "app.pop_screen", "close function selector"),
+    ]
+
+    @classmethod
+    def is_open(cls, app: App) -> bool:
+        return type(app.screen) is cls
+
+    def compose(self) -> ComposeResult:
+        yield OptionList(id="function-list")
+
+    @staticmethod
+    def get_option_from_function(
+        *,
+        func_name: str,
+        func_obj: Callable,
+        func_help: str,
+    ) -> Option:
+        function_with_signature = get_name_of_function(func_obj, func_name)
+
+        return Option(
+            prompt=Group(
+                Text(
+                    function_with_signature,
+                    Style(
+                        color="#FFA800",
+                        bold=True,
+                    ),
+                ),
+                Markdown(f"{func_help}", style=Style(italic=True)),
+                Text(),
+            ),
+            id=func_name,
+        )
+
+    def on_mount(self):
+        function_list = self.query_one(OptionList)
+        skipped_first_separator = False
+        for category, functions in function_help_texts.items():
+            if skipped_first_separator:
+                function_list.add_option(Separator())
+            skipped_first_separator = True
+            function_list.add_option(
+                Option(
+                    prompt=Text(category, Style(bold=True)),
+                    disabled=True,
+                )
+            )
+            function_list.add_options([
+                self.get_option_from_function(
+                    func_name=func_name,
+                    func_obj=evaluator.func_map[func_name],
+                    func_help=func_help,
+                )
+                for func_name, func_help in functions.items()
+            ])
+
+    @on(OptionList.OptionSelected, "#function-list")
+    def on_function_selected(self, event: OptionList.OptionSelected):
+        app = self.app
+        assert isinstance(app, DimansApp)
+        app.pop_screen()
+        app.action_insert(f"{event.option.id}()", len(event.option.id) + 1)
+
+
 class DimansApp(App):
     TITLE = "Dimans CLI"
     CSS_PATH = "style.tcss"
@@ -205,6 +279,12 @@ class DimansApp(App):
         DimansIdents,
         DimansFunctions
     }
+    BINDINGS = [
+        Binding("f1", "show_function_selector", "function selector"),
+    ]
+
+    def __init__(self):
+        super().__init__()
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -338,6 +418,10 @@ class DimansApp(App):
             + line_input.value[insertion_pos:]
         )
         line_input.cursor_position = insertion_pos + forwards
+
+    def action_show_function_selector(self):
+        if not FunctionSelector.is_open(self):
+            self.push_screen(FunctionSelector())
 
 
 app = DimansApp()

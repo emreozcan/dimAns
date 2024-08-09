@@ -313,12 +313,99 @@ def create_functions_map() -> dict[str, Callable]:
     # region add functions that are handled by the interpreter
     func_map.update({
         "r": lambda x: raiser(NotImplementedError()),
+        "r": lambda n: raiser(NotImplementedError()),
     })
     # endregion
 
     # mypy says that we return "dict[str, function]" instead of the annotated
     # "dict[str, Callable]" and that they're incompatible, apparently.
     return func_map  # type: ignore
+
+
+function_help_texts: dict[str, dict[str, str]] = {
+    "Number-theoretic and representation functions": {
+        "ceil": "Returns the smallest integer greater than or equal to `x`.",
+        "comb": "Returns the number of ways to choose `k` items from `n` items "
+                "without repetition and without order.",
+        "copysign": "Returns `x` with the sign of `y`.",
+        "abs": "Returns the absolute value of `x`.",
+        "factorial": "Returns the factorial of `x`.",
+        "floor": "Returns the largest integer less than or equal to `x`.",
+        "mod": "Returns the remainder from the division of `x` by `y`, "
+               "`x mod y`.",
+        "isfinite": "Returns `True` if `x` is a finite number, `False` "
+                    "otherwise.",
+        "isinf": "Returns `True` if `x` is positive or negative infinity, "
+                 "`False` otherwise.",
+        "isnan": "Returns `True` if `x` is `NaN`, `False` otherwise.",
+        "isqrt": "Returns the integer square root of `x`.",
+        "perm": "Returns the number of ways to choose `k` items from `n` items "
+                "without repetition and with order.",
+        "trunc": "Returns the nearest integer to `x` towards `0`.",
+    },
+    "Power and logarithmic functions": {
+        "cbrt": "Returns the cube root of `x`.",
+        "exp": "Returns `e` raised to the power of `x`.",
+        "exp2": "Returns `2` raised to the power of `x`.",
+        "expm1": "Returns `e` raised to the power of `x`, minus `1`.",
+        "log": "Returns the logarithm of `x` with base `base`.",
+        "log1p": "Returns the natural logarithm of `1` plus `x`.",
+        "log2": "Returns the base `2` logarithm of `x`.",
+        "log10": "Returns the base `10` logarithm of `x`.",
+        "pow": "Returns `x` raised to the power of `y`, `x ^ y`.",
+        "sqrt": "Returns the square root of `x`.",
+    },
+    "Trigonometric functions": {
+        "acos": "Returns the arc cosine (measured in radians) of `x`.",
+        "asin": "Returns the arc sine (measured in radians) of `x`.",
+        "atan": "Returns the arc tangent (measured in radians) of `x`.",
+        "atan2": "Returns the arc tangent of `y / x` (measured in radians) in "
+                 "the correct quadrant.",
+        "cos": "Returns the cosine of `x` (measured in radians).",
+        "dist": "Returns the Euclidean distance between `x` and `y`.",
+        "sin": "Returns the sine of `x` (measured in radians).",
+        "tan": "Returns the tangent of `x` (measured in radians).",
+    },
+    "Angular conversions": {
+        "degrees": "Returns `x` radians expressed in degrees.",
+        "radians": "Returns `x` degrees expressed in radians.",
+    },
+    "Hyperbolic functions": {
+        "acosh": "Returns the inverse hyperbolic cosine of `x`.",
+        "asinh": "Returns the inverse hyperbolic sine of `x`.",
+        "atanh": "Returns the inverse hyperbolic tangent of `x`.",
+        "cosh": "Returns the hyperbolic cosine of `x`.",
+        "sinh": "Returns the hyperbolic sine of `x`.",
+        "tanh": "Returns the hyperbolic tangent of `x`.",
+    },
+    "Special functions": {
+        "erf": "Returns the error function at `x`.",
+        "erfc": "Returns the complementary error function at `x`.",
+        "gamma": "Returns the Gamma function at `x`.",
+        "lgamma": "Returns the natural logarithm of the absolute value of the"
+                  "Gamma function at `x`.",
+    },
+    "dimAns functions": {
+        "dim": "Returns the dimensions of `x`.",
+        "unit": "Returns the unit of `x`.",
+        "val": "Returns the value of `x`.",
+        "uval": "Returns the underlying value of `x`.",
+    },
+    "dimAns Calculator functions": {
+        "exit": "Exits the interactive calculator session.",
+        "r": "Returns the result of the `n`th calculation.",
+    },
+    "Operator functions": {
+        "add": "Returns `x + y`.",
+        "sub": "Returns `x - y`.",
+        "mul": "Returns `x * y`.",
+        "div": "Returns `x / y`.",
+        "neg": "Returns `-x`.",
+    }
+}
+function_help_text_map = {}
+for category_funcs in function_help_texts.values():
+    function_help_text_map.update(category_funcs)
 
 
 def dimensional_pow(left, right) -> float:
@@ -539,6 +626,6 @@ def get_names_overview(value: Quantity | float | Unit) -> str:
     return f"{longest_name} ({shortest_name})"
 
 
-def get_name_of_function(func_obj, name) -> str:
+def get_name_of_function(func_obj: Callable, name: str) -> str:
     sig = inspect.signature(func_obj)
     return f"{name}{sig}"
