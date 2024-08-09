@@ -14,7 +14,21 @@
 ## Installation
 
 ```bash
-pip install dimans
+pip install --upgrade dimans
+```
+
+If you want to use the calculator, you will need to install the "cli" extra to
+install some additional dependencies:
+
+```bash
+pip install --upgrade dimans[cli]
+```
+
+If you are using a Linux distribution like Arch that disallows installing
+packages using pip, you will need to use a tool such as `pipx`:
+
+```bash
+pipx install --upgrade dimans[cli]
 ```
 
 ## Usage
@@ -23,4 +37,10 @@ pip install dimans
 >>> from dimans.units import gram, kilogram, metre
 >>> (32_000 * gram).to(kilogram)
 <Quantity 32.0 kg>
+```
+
+## Calculator
+
+```bash
+dimans
 ```
