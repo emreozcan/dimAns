@@ -406,7 +406,7 @@ class CalculatorEvaluator(Transformer):
         min_params = sum(
             1 for p in sig.parameters.values()
             if p.kind == p.kind.POSITIONAL_OR_KEYWORD
-            and p.default is not p.empty
+            and p.default is p.empty
         )
         max_params: int | None = len(sig.parameters)
         for param in sig.parameters.values():
