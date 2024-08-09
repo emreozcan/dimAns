@@ -19,7 +19,7 @@ from textual.command import Provider, Hits, Hit, DiscoveryHit
 from textual.containers import Horizontal, Vertical, VerticalScroll, Container
 from textual.screen import ModalScreen, Screen
 from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
-    Static, OptionList, Button
+    Static, OptionList, Button, Rule
 from textual.widgets.option_list import Option, Separator
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit, \
@@ -59,6 +59,15 @@ class Results(VerticalScroll):
         self.results: ResultListType = []
 
     def add_result(self, line: str, parsed: lark.Tree, result: CalcResult):
+        if not self.results:
+            self.mount_all(
+                [
+                    Static(),
+                    Static(),
+                    Rule(),
+                ],
+                before=0,
+            )
         self.results.append((line, parsed, result))
         self.mount_all(
             [
@@ -81,6 +90,22 @@ class Results(VerticalScroll):
                 result[0] + "\n" + represent_result(result[1], result[2]),
                 classes="result-repr"
             )
+        if self.results:
+            yield Static()
+            yield Static()
+            yield Rule()
+        yield Static("    ")
+        yield Static(" ")
+        yield Static(
+            Text(
+                f"{len(evaluator.reverse_ident_map)} identifiers\n"
+                f"{len(evaluator.ident_map)} aliases\n"
+                f"{len(evaluator.func_map)} functions\n\n"
+                f"dimAns Calculator {dimans_version}\n"
+                f"Copyright (c) 2023-2024 Emre Özcan"
+            ),
+            classes="dimans-title",
+        )
 
 
 class HistoryInput(Input):

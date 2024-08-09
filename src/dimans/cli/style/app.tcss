@@ -50,6 +50,14 @@ Results .result-id {
 Results .result-eq {
     color: gray;
 }
+Results Rule {
+    margin: 0;
+    color: gray;
+}
+Results .dimans-title {
+    color: gray;
+    text-style: italic;
+}
 
 FunctionSelector {
     layout: grid;
