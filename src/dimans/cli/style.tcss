@@ -1,0 +1,46 @@
+#line-input {
+    min-height: 2;
+    max-height: 50%;
+    height: auto;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+#line-input.success {
+    border: tall $success 60%;
+}
+#line-input.success:focus {
+    border: tall $success;
+}
+#line-input.error {
+    border: tall $error 60%;
+}
+#line-input.error:focus {
+    border: tall $error;
+}
+
+#result-label {
+    padding: 0 2;
+    height: 5;
+    content-align-vertical: bottom;
+    color: gray;
+    width: 100%;
+}
+
+#result-log {
+    padding: 0 1;
+    min-height: 0;
+    height: auto;
+}
+
+Results {
+    layout: grid;
+    grid-size: 2;
+    grid-columns: auto 1fr;
+    grid-rows: auto;
+    grid-gutter: 1;
+
+    height: 1fr;
+}
+Results .result-id {
+    color: gray;
+}

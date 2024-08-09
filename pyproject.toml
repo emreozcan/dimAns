@@ -36,6 +36,7 @@ dimans = "dimans.cli:main"
 cli = [
     "lark",
     "rich",
+    "textual",
 ]
 
 [project.urls]

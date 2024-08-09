@@ -199,6 +199,10 @@ def reverse_map(__map: Mapping[KT, VT], /) -> dict[VT, list[KT]]:
     return reversed_map
 
 
+def raiser(x: Exception, /):
+    raise x
+
+
 def create_functions_map() -> dict[str, Callable]:
     def factorial(x):
         if not isinstance(x, int):
@@ -306,6 +310,12 @@ def create_functions_map() -> dict[str, Callable]:
     func_map["exit"] = func_exit
     # endregion
 
+    # region add functions that are handled by the interpreter
+    func_map.update({
+        "r": lambda x: raiser(NotImplementedError()),
+    })
+    # endregion
+
     # mypy says that we return "dict[str, function]" instead of the annotated
     # "dict[str, Callable]" and that they're incompatible, apparently.
     return func_map  # type: ignore
@@ -317,6 +327,11 @@ def dimensional_pow(left, right) -> float:
     return left ** right
 
 
+CalcOutcome = Quantity | Unit | float
+CalcResult = CalcOutcome | list[CalcOutcome]
+ResultListType = list[tuple[str, CalcResult]]
+
+
 @v_args(inline=True)
 class CalculatorEvaluator(Transformer):
 
@@ -326,6 +341,7 @@ class CalculatorEvaluator(Transformer):
 
     def __init__(self):
         super().__init__()
+        self.results: ResultListType = []
 
     add = staticmethod(operator.add)
     sub = staticmethod(operator.sub)
@@ -442,12 +458,27 @@ class CalculatorEvaluator(Transformer):
                 f"parameters ({param_count} given)"
             )
 
+        if name == "r":
+            return self.function_r(*args)
+
         try:
             ret_val = func_obj(*args)
         except Exception as e:
             raise CalcError(f"{name.value}: {e}")
 
         return ret_val
+
+    def function_r(self, index: float):
+        if not isinstance(index, int):
+            try:
+                index = int(index)
+            except (ValueError, TypeError):
+                raise CalcError(f"Invalid result index '{index}'")
+
+        try:
+            return self.results[index][1]
+        except IndexError:
+            raise CalcError(f"Unknown result {index}")
 
 
 evaluator = CalculatorEvaluator()

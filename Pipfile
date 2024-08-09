@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 lark = "*"
 rich = "*"
+textual = "*"
 
 [dev-packages]
 black = "*"
@@ -14,3 +15,4 @@ flit = "~=3.4"
 mypy = "*"
 pytest = "~=7.4"
 pytest-cov = "*"
+textual-dev = "*"
