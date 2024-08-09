@@ -178,7 +178,7 @@ class DimansFunctions(Provider):
                 func_name=func_name,
                 func_name_with_args=get_name_of_function(func_obj, func_name),
                 func_obj=func_obj,
-                help_text=None,
+                help_text=function_help_text_map.get(func_name, None)
             )
             for func_name, func_obj in evaluator.func_map.items()
         ]
