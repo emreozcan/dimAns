@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from functools import partial
+from typing import NamedTuple
 
 import lark
 from lark import Tree
@@ -12,7 +14,8 @@ from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
     Static
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit, \
-    ResultListType, CalcResult, get_longest_name, get_names_overview
+    ResultListType, CalcResult, get_longest_name, get_names_overview, \
+    CalcOutcome, non_letter_regex, get_name_of_function
 from .. import Quantity, Unit, DerivedUnit
 
 try:
@@ -109,28 +112,50 @@ class HistoryInput(Input):
                 self.action_end()
 
 
+
+class CommandifiedIdent(NamedTuple):
+    ident_name: str
+    ident_value: CalcOutcome
+    help_text: str
+
+
+
 class DimansIdents(Provider):
+    async def startup(self):
+        self.precalculated_list: list[CommandifiedIdent] = [
+            CommandifiedIdent(
+                ident_name=ident_name,
+                ident_value=ident_value,
+                help_text=(
+                    f"{get_names_overview(ident_value)}\n"
+                    f"{DerivedUnit.using(ident_value)}"
+                ) if isinstance(ident_value, DerivedUnit) else (
+                    f"{get_names_overview(ident_value)}\n"
+                    f"{str(ident_value)}"
+                )
+            )
+            for ident_name, ident_value in evaluator.ident_map.items()
+        ]
+
     async def search(self, query: str) -> Hits:
         matcher = self.matcher(query)
+        if len(matcher.query) < 3:
+            return
         app = self.app
         assert isinstance(app, DimansApp)
 
-        for ident_name, ident_value in evaluator.ident_map.items():
-            kind = "Unit: " if isinstance(ident_value, Unit) else "Constant: "
-            command_name = kind + ident_name
-            score = matcher.match(command_name)
+        for metadata in self.precalculated_list:
+            score = matcher.match(metadata.ident_name)
 
             if score > 0:
-                if isinstance(ident_value, DerivedUnit):
-                    help_text = (
-                        f"{get_names_overview(ident_value)}\n"
-                        f"{ident_value._str_with_multiplicands()}"
-                    )
-                else:
-                    help_text = (
-                        f"{get_names_overview(ident_value)}\n"
-                        f"{str(ident_value)}"
-                    )
+                yield Hit(
+                    score,
+                    matcher.highlight(metadata.ident_name),
+                    partial(app.action_insert, metadata.ident_name),
+                    text=metadata.ident_name,
+                    help=metadata.help_text,
+                )
+
 
                 yield Hit(
                     score,
@@ -269,7 +294,9 @@ class DimansApp(App):
         results_container.add_result(in_line, parsed_line, evaled_line)
         event.input.clear()
 
-    def action_insert(self, text: str):
+    def action_insert(self, text: str, forwards: int = None):
+        if forwards is None:
+            forwards = len(text)
         line_input = self.query_one("#line-input", Input)
         insertion_pos = line_input.cursor_position
         line_input.value = (
@@ -277,7 +304,7 @@ class DimansApp(App):
             + text
             + line_input.value[insertion_pos:]
         )
-        line_input.cursor_position = insertion_pos + len(text)
+        line_input.cursor_position = insertion_pos + forwards
 
 
 app = DimansApp()

@@ -524,8 +524,14 @@ def get_shortest_name(value: Quantity | float | Unit) -> str:
 
 
 def get_names_overview(value: Quantity | float | Unit) -> str:
-    shortest_name = get_shortest_name(value)
-    longest_name = get_longest_name(value)
+    if value not in evaluator.reverse_ident_map:
+        if isinstance(value, DerivedUnit):
+            return value._str_with_multiplicands()
+        return str(value)
+
+    aliases = evaluator.reverse_ident_map[value]
+    shortest_name = min(aliases, key=len)
+    longest_name = max(aliases, key=len)
 
     if shortest_name == longest_name:
         return shortest_name
