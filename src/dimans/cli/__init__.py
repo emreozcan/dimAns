@@ -126,9 +126,11 @@ class HistoryInput(Input):
                 self.value = self.history[-1]
                 self.post_message(Input.Submitted(self, self.value))
             return
-        self.history.append(event.value)
+
+    def push_history(self, value: str):
+        self.history.append(value)
         self.history_index = 0
-        self.placeholder = event.value
+        self.placeholder = value
 
     def action_history_back(self):
         if self.history_index < len(self.history):
@@ -502,6 +504,7 @@ class DimansApp(App):
         results_container = self.query_one(Results)
         evaluator.results.append((in_line, parsed_line, evaled_line))
         results_container.add_result(in_line, parsed_line, evaled_line)
+        event.input.push_history(in_line)
         event.input.clear()
 
     def action_insert(self, text: str, forwards: int | None = None):
