@@ -380,6 +380,7 @@ class DimansApp(App):
         Binding("escape", "keyboard_interrupt", "back", show=False),
         Binding("ctrl+c", "keyboard_interrupt", "back", show=False),
         Binding("ctrl+q", "quit", "quit", show=True, priority=True),
+        Binding("f12", "screenshot", "screenshot", show=False, priority=True),
     ]
 
     def __init__(self):
@@ -488,10 +489,11 @@ class DimansApp(App):
 
     @on(Input.Submitted, "#line-input")
     async def on_line_input_submitted(self, event: Input.Submitted):
-        if not event.input.has_class("success"):
+        history_input: HistoryInput = event.input  # type: ignore
+        if not history_input.has_class("success"):
             return
 
-        in_line = event.input.value
+        in_line = history_input.value
         try:
             parsed_line = parser.parse(in_line)
         except lark.UnexpectedInput:
@@ -504,8 +506,8 @@ class DimansApp(App):
         results_container = self.query_one(Results)
         evaluator.results.append((in_line, parsed_line, evaled_line))
         results_container.add_result(in_line, parsed_line, evaled_line)
-        event.input.push_history(in_line)
-        event.input.clear()
+        history_input.push_history(in_line)
+        history_input.clear()
 
     def action_insert(self, text: str, forwards: int | None = None):
         if forwards is None:
