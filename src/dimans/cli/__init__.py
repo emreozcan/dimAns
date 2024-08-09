@@ -1,4 +1,5 @@
 import lark
+from lark import Tree
 from rich.console import Console
 from textual import on
 from textual.app import App, ComposeResult
@@ -40,15 +41,15 @@ class Results(VerticalScroll):
         super().__init__()
         self.results: ResultListType = []
 
-    def add_result(self, line: str, result: CalcResult):
-        self.results.append((line, result))
+    def add_result(self, line: str, parsed: Tree, result: CalcResult):
+        self.results.append((line, parsed, result))
 
     def compose(self) -> ComposeResult:
         max_result = len(self.results) - 1
         for number, result in enumerate(reversed(self.results)):
             yield Static(f"r({max_result-number}) =", classes="result-id")
             yield Static(
-                result[0] + "\n" + represent_result(result[0], result[1]),
+                result[0] + "\n" + represent_result(result[1], result[2]),
                 classes="result-repr"
             )
 
@@ -173,8 +174,8 @@ class DimansApp(App):
             return
 
         results_container = self.query_one(Results)
-        evaluator.results.append((in_line, evaled_line))
-        results_container.add_result(in_line, evaled_line)
+        evaluator.results.append((in_line, parsed_line, evaled_line))
+        results_container.add_result(in_line, parsed_line, evaled_line)
         await results_container.recompose()
         event.input.clear()
 

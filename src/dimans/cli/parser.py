@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from typing import TypeVar
 
-from lark import Lark, Transformer, v_args, Token
+from lark import Lark, Transformer, v_args, Token, Tree
 
 from .. import (
     units,
@@ -329,7 +329,7 @@ def dimensional_pow(left, right) -> float:
 
 CalcOutcome = Quantity | Unit | float
 CalcResult = CalcOutcome | list[CalcOutcome]
-ResultListType = list[tuple[str, CalcResult]]
+ResultListType = list[tuple[str, Tree, CalcResult]]
 
 
 @v_args(inline=True)
@@ -476,7 +476,7 @@ class CalculatorEvaluator(Transformer):
                 raise CalcError(f"Invalid result index '{index}'")
 
         try:
-            return self.results[index][1]
+            return self.results[index][2]
         except IndexError:
             raise CalcError(f"Unknown result {index}")
 
