@@ -62,7 +62,7 @@ class Results(VerticalScroll):
         self.results.append((line, parsed, result))
         self.mount_all(
             [
-                Static(f"r({len(self.results)})", classes="result-id"),
+                Static(f"r({len(self.results) - 1})", classes="result-id"),
                 Static("=", classes="result-eq"),
                 Static(
                     line + "\n" + represent_result(parsed, result),
