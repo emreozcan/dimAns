@@ -17,7 +17,6 @@ ton_of_refrigeration = (12_000 * _british_termal_unit / _hour).as_derived_unit(
 )
 watt_incandescent_replacement = (15 * _lumen).as_derived_unit("w")
 amazon_river = (216_000 * _metre**3 / _second).as_derived_unit("Amazon River")
-sverdrup = (1_000_000 * _metre**3 / _second).as_derived_unit("Sv")
 langley = (_calorie / _centimetre**2).as_derived_unit("Ly")
 stokes = (_centimetre**2 / _second).as_derived_unit("St")
 milli_earth_rate_unit = (0.15 * _degree / _hour).as_derived_unit("MERU")
