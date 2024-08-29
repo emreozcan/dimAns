@@ -15,7 +15,9 @@ from ..si_base.gram import hectogram as _hectogram
 ton_of_refrigeration = (12_000 * _british_termal_unit / _hour).as_derived_unit(
     "TR"
 )
-watt_incandescent_replacement = (15 * _lumen).as_derived_unit("w")
+watt_incandescent_replacement = (15 * _lumen).as_derived_unit(
+    "watt incandescent replacement"
+)
 amazon_river = (216_000 * _metre**3 / _second).as_derived_unit("Amazon River")
 langley = (_calorie / _centimetre**2).as_derived_unit("Ly")
 stokes = (_centimetre**2 / _second).as_derived_unit("St")
