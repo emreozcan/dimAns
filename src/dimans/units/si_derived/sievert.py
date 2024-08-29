@@ -2,7 +2,7 @@ from .joule import joule as _joule
 from ..si_base.gram import kilogram as _kilogram
 from ..metric_utils import make_metric_units as _make_metric_units
 
-sievert = (_joule / _kilogram).as_derived_unit("Gy")
+sievert = (_joule / _kilogram).as_derived_unit("Sv")
 
 (
     quettasievert,
