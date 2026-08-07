@@ -20,7 +20,7 @@ from textual.containers import Horizontal, Vertical, VerticalScroll, Container
 from textual.screen import ModalScreen, Screen
 from textual.widgets import Header, Footer, Input, TextArea, Label, RichLog, \
     Static, OptionList, Button, Rule
-from textual.widgets.option_list import Option, Separator
+from textual.widgets.option_list import Option
 
 from .parser import parser, evaluator, CalcError, get_canonical_unit, \
     ResultListType, CalcResult, get_longest_name, get_names_overview, \
@@ -335,7 +335,7 @@ class FunctionSelector(ModalScreen):
         skipped_first_separator = False
         for category, functions in function_help_texts.items():
             if skipped_first_separator:
-                function_list.add_option(Separator())
+                function_list.add_option(None)
             skipped_first_separator = True
             function_list.add_option(
                 Option(
