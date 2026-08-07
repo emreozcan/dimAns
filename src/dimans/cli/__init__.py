@@ -102,7 +102,7 @@ class Results(VerticalScroll):
                 f"{len(evaluator.ident_map)} aliases\n"
                 f"{len(evaluator.func_map)} functions\n\n"
                 f"dimAns Calculator {dimans_version}\n"
-                f"Copyright (c) 2023-2024 Emre Özcan"
+                f"Copyright (c) 2023-2026 Emre Özcan"
             ),
             classes="dimans-title",
         )
